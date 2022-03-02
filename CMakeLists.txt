@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(robot_localization)
 
 if(NOT WIN32)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -35,7 +35,7 @@ find_package(yaml_cpp_vendor REQUIRED)
 
 # Geographiclib installs FindGeographicLib.cmake to this non-standard location
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/cmake/geographiclib/")
-find_package(GeographicLib REQUIRED COMPONENTS STATIC)
+find_package(GeographicLib REQUIRED)
 
 set(library_name rl_lib)
 
