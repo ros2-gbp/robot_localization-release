@@ -1,1 +1,1 @@
-{"base": "2c4d896", "parent": "debian/rolling/robot_localization", "previous": "40cba17", "trim": "", "trimbase": ""}
+{"base": "99b6373", "parent": "debian/humble/robot_localization", "previous": "3b38199", "trim": "", "trimbase": ""}
