@@ -30,12 +30,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "robot_localization/ekf.hpp"
 
-#include <robot_localization/ekf.hpp>
-#include <robot_localization/filter_common.hpp>
-#include <Eigen/Dense>
-#include <rclcpp/duration.hpp>
+#include <cmath>
 #include <vector>
+
+#include "angles/angles.h"
+#include "Eigen/Dense"
+#include "rclcpp/time.hpp"
+#include "robot_localization/filter_base.hpp"
+#include "robot_localization/filter_common.hpp"
+#include "robot_localization/filter_utilities.hpp"
+#include "robot_localization/measurement.hpp"
 
 namespace robot_localization
 {
@@ -177,13 +183,7 @@ void Ekf::correct(const Measurement & measurement)
       update_indices[i] == StateMemberPitch ||
       update_indices[i] == StateMemberYaw)
     {
-      while (innovation_subset(i) < -PI) {
-        innovation_subset(i) += TAU;
-      }
-
-      while (innovation_subset(i) > PI) {
-        innovation_subset(i) -= TAU;
-      }
+      innovation_subset(i) = ::angles::normalize_angle(innovation_subset(i));
     }
   }
 
