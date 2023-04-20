@@ -192,7 +192,8 @@ tracks:
     ros_distro: iron
     vcs_type: git
     vcs_uri: https://github.com/cra-ros-pkg/robot_localization.git
-    version: :{auto}
+    version: 3.5.0
+    version_saved: :{auto}
   jade:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
