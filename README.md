@@ -1,3 +1,26 @@
+## robot_localization (humble) - 3.5.1-2
+
+The packages in the `robot_localization` repository were released into the `humble` distro by running `/usr/bin/bloom-release robot_localization --rosdistro humble --track humble --edit` on `Wed, 24 May 2023 19:27:27 -0000`
+
+The `robot_localization` package was released.
+
+Version of package(s) in repository `robot_localization`:
+
+- upstream repository: https://github.com/cra-ros-pkg/robot_localization.git
+- release repository: https://github.com/ros2-gbp/robot_localization-release.git
+- rosdistro version: `3.4.2-1`
+- old version: `3.5.1-1`
+- new version: `3.5.1-2`
+
+Versions of tools used:
+
+- bloom version: `0.11.2`
+- catkin_pkg version: `0.5.2`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## robot_localization (humble) - 3.5.1-1
 
 The packages in the `robot_localization` repository were released into the `humble` distro by running `/usr/bin/bloom-release robot_localization --rosdistro humble --track humble --edit` on `Wed, 24 May 2023 19:25:27 -0000`
