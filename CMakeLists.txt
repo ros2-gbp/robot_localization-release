@@ -198,30 +198,20 @@ if(BUILD_TESTING)
   rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
   target_link_libraries(test_ekf "${cpp_typesupport_target}")
 
-  ament_add_gtest_executable(
-    test_ekf_node_interfaces
-    test/test_se_node_interfaces.cpp)
-  target_link_libraries(
-    test_ekf_node_interfaces
-    ${library_name})
+  ament_add_gtest_executable(test_ekf_localization_node_interfaces
+                    test/test_ekf_localization_node_interfaces.cpp)
+  target_link_libraries(test_ekf_localization_node_interfaces ${library_name})
 
-  rosidl_get_typesupport_target(
-    cpp_typesupport_target
-    "${PROJECT_NAME}" "rosidl_typesupport_cpp")
-  target_link_libraries(
-    test_ekf_node_interfaces
-    "${cpp_typesupport_target}")
+  rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+  target_link_libraries(test_ekf_localization_node_interfaces "${cpp_typesupport_target}")
 
-  add_dependencies(
-    test_ekf_node_interfaces
-    ekf_node)
-  ament_add_test(
-    test_ekf_node_interfaces
+  add_dependencies(test_ekf_localization_node_interfaces ekf_node)
+  ament_add_test(test_ekf_localization_node_interfaces
     GENERATE_RESULT_FOR_RETURN_CODE_ZERO
     TIMEOUT 300
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test/test_se_node_interfaces.launch.py"
-    ENV NODE_TYPE=ekf
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test/test_ekf_localization_node_interfaces.launch.py"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
 
   #### UKF TESTS #####
   ament_add_gtest(test_ukf test/test_ukf.cpp)
@@ -230,30 +220,20 @@ if(BUILD_TESTING)
   rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
   target_link_libraries(test_ukf "${cpp_typesupport_target}")
 
-  ament_add_gtest_executable(
-    test_ukf_node_interfaces
-    test/test_se_node_interfaces.cpp)
-  target_link_libraries(
-    test_ukf_node_interfaces
-    ${library_name})
+  ament_add_gtest_executable(test_ukf_localization_node_interfaces
+                    test/test_ukf_localization_node_interfaces.cpp)
+  target_link_libraries(test_ukf_localization_node_interfaces ${library_name})
 
-  rosidl_get_typesupport_target(
-    cpp_typesupport_target
-    "${PROJECT_NAME}" "rosidl_typesupport_cpp")
-  target_link_libraries(
-    test_ukf_node_interfaces
-    "${cpp_typesupport_target}")
+  rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+  target_link_libraries(test_ukf_localization_node_interfaces "${cpp_typesupport_target}")
 
-  add_dependencies(
-    test_ukf_node_interfaces
-    ukf_node)
-  ament_add_test(
-    test_ukf_node_interfaces
+  add_dependencies(test_ukf_localization_node_interfaces ukf_node)
+  ament_add_test(test_ukf_localization_node_interfaces
     GENERATE_RESULT_FOR_RETURN_CODE_ZERO
     TIMEOUT 300
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test/test_se_node_interfaces.launch.py"
-    ENV NODE_TYPE=ukf
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test/test_ukf_localization_node_interfaces.launch.py"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
 
   #### DATA TESTS #####
 #  ament_add_gtest(test_ekf_localization_node_bag1 test/test_localization_node_bag_pose_tester.cpp)
@@ -287,6 +267,10 @@ if(BUILD_TESTING)
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   )
 
+  #### NAVSAT CONVERSION TESTS ####
+  ament_add_gtest(test_navsat_conversions test/test_navsat_conversions.cpp)
+  target_link_libraries(test_navsat_conversions ${library_name})
+
   ament_add_gtest_executable(test_ros_robot_localization_listener
                   test/test_ros_robot_localization_listener.cpp)
   target_link_libraries(test_ros_robot_localization_listener ${library_name})
@@ -314,13 +298,14 @@ if(BUILD_TESTING)
     filter_base-test
     test_filter_base_diagnostics_timestamps
     test_ekf
-    test_ekf_node_interfaces
+    test_ekf_localization_node_interfaces
     test_ukf
-    test_ukf_node_interfaces
+    test_ukf_localization_node_interfaces
     #test_ekf_localization_node_bag1
     #test_ekf_localization_node_bag2
     #test_ekf_localization_node_bag3
     test_robot_localization_estimator
+    test_navsat_conversions
     test_ros_robot_localization_listener
     test_ros_robot_localization_listener_publisher
     #test_ukf_localization_node_bag1

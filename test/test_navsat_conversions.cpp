@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, 2016 Charles River Analytics, Inc.
- * Copyright (c) 2017, Locus Robotics, Inc.
+ * Copyright (c) 2021, Charles River Analytics, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,56 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ROBOT_LOCALIZATION__EKF_HPP_
-#define ROBOT_LOCALIZATION__EKF_HPP_
+#include <gtest/gtest.h>
 
-#include <robot_localization/filter_base.hpp>
-#include <vector>
+#include <string>
 
-namespace robot_localization
+#include "robot_localization/navsat_conversions.hpp"
+
+void NavsatConversionsTest(
+  const double lat, const double lon,
+  const double UTMNorthing, const double UTMEasting,
+  const std::string UTMZone, const double gamma)
 {
+  double UTMNorthing_new;
+  double UTMEasting_new;
+  std::string UTMZone_new;
+  double gamma_new;
+  robot_localization::navsat_conversions::LLtoUTM(
+    lat, lon, UTMNorthing_new, UTMEasting_new, UTMZone_new, gamma_new);
+  EXPECT_NEAR(UTMNorthing, UTMNorthing_new, 1e-2);
+  EXPECT_NEAR(UTMEasting, UTMEasting_new, 1e-2);
+  EXPECT_EQ(UTMZone, UTMZone_new);
+  EXPECT_NEAR(gamma, gamma_new, 1e-2);
+  double lat_new;
+  double lon_new;
+  robot_localization::navsat_conversions::UTMtoLL(
+    UTMNorthing, UTMEasting, UTMZone, lat_new, lon_new);
+  EXPECT_NEAR(lat_new, lat, 1e-5);
+  EXPECT_NEAR(lon_new, lon, 1e-5);
+}
 
-/**
- * @brief Extended Kalman filter class
- *
- * Implementation of an extended Kalman filter (EKF). This class derives from
- * FilterBase and overrides the predict() and correct() methods in keeping with
- * the discrete time EKF algorithm.
- */
-class Ekf : public FilterBase
+TEST(NavsatConversionsTest, UtmTest)
 {
-public:
-  /**
-   * @brief Constructor for the Ekf class
-   */
-  Ekf();
+  NavsatConversionsTest(51.423964, 5.494271, 5699924.709, 673409.989, "31U", 1.950);
+  NavsatConversionsTest(-43.530955, 172.636645, 5178919.718, 632246.802, "59G", -1.127);
+}
 
-  /**
-   * @brief Destructor for the Ekf class
-   */
-  ~Ekf();
-
-  /**
-   * @brief Carries out the correct step in the predict/update cycle.
-   *
-   * @param[in] measurement - The measurement to fuse with our estimate
-   */
-  void correct(const Measurement & measurement) override;
-
-  /**
-   * @brief Carries out the predict step in the predict/update cycle.
-   *
-   * Projects the state and error matrices forward using a model of the
-   * vehicle's motion.
-   *
-   * @param[in] reference_time - The time at which the prediction is being made
-   * @param[in] delta - The time step over which to predict.
-   */
-  void predict(
-    const rclcpp::Time & reference_time,
-    const rclcpp::Duration & delta) override;
-};
-
-}  // namespace robot_localization
-
-#endif  // ROBOT_LOCALIZATION__EKF_HPP_
+int main(int argc, char ** argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

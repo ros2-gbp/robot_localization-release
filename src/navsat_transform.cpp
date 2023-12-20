@@ -29,34 +29,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "robot_localization/navsat_transform.hpp"
 
-#include <chrono>
-#include <functional>
-#include <memory>
+#include <robot_localization/filter_common.hpp>
+#include <robot_localization/filter_utilities.hpp>
+#include <robot_localization/navsat_conversions.hpp>
+#include <robot_localization/navsat_transform.hpp>
+#include <robot_localization/ros_filter_utilities.hpp>
+
+#include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+#include <Eigen/Dense>
+
+#include <iostream>
 #include <string>
 #include <vector>
-
-#include "angles/angles.h"
-#include "Eigen/Dense"
-#include "nav_msgs/msg/odometry.hpp"
-#include "rclcpp/qos.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "robot_localization/filter_common.hpp"
-#include "robot_localization/navsat_conversions.hpp"
-#include "robot_localization/ros_filter_utilities.hpp"
-#include "robot_localization/srv/from_ll.hpp"
-#include "robot_localization/srv/set_datum.hpp"
-#include "robot_localization/srv/to_ll.hpp"
-#include "sensor_msgs/msg/imu.hpp"
-#include "sensor_msgs/msg/nav_sat_fix.hpp"
-#include "tf2/LinearMath/Matrix3x3.h"
-#include "tf2/LinearMath/Quaternion.h"
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/LinearMath/Vector3.h"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include <memory>
+#include <utility>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -243,6 +237,13 @@ void NavSatTransform::transformCallback()
 
 void NavSatTransform::computeTransform()
 {
+  // When using manual datum, wait for the receive of odometry message so
+  // that the base frame and world frame names can be set before
+  // the manual datum pose is set. This must be done prior to the transform computation.
+  if (!transform_good_ && has_transform_odom_ && use_manual_datum_) {
+    setManualDatum();
+  }
+
   // Only do this if:
   // 1. We haven't computed the odom_frame->cartesian_frame transform before
   // 2. We've received the data we need
@@ -355,6 +356,9 @@ bool NavSatTransform::datumCallback(
   robot_localization::srv::SetDatum::Request::SharedPtr request,
   robot_localization::srv::SetDatum::Response::SharedPtr)
 {
+  // store manual data geopose until the transform can be computed.
+  manual_datum_geopose_ = request->geo_pose;
+
   // If we get a service call with a manual datum, even if we already computed
   // the transform using the robot's initial pose, then we want to assume that
   // we are using a datum from now on, and we want other methods to not attempt
@@ -362,11 +366,15 @@ bool NavSatTransform::datumCallback(
   use_manual_datum_ = true;
 
   transform_good_ = false;
+  return true;
+}
 
+void NavSatTransform::setManualDatum()
+{
   sensor_msgs::msg::NavSatFix fix;
-  fix.latitude = request->geo_pose.position.latitude;
-  fix.longitude = request->geo_pose.position.longitude;
-  fix.altitude = request->geo_pose.position.altitude;
+  fix.latitude = manual_datum_geopose_.position.latitude;
+  fix.longitude = manual_datum_geopose_.position.longitude;
+  fix.altitude = manual_datum_geopose_.position.altitude;
   fix.header.stamp = this->now();
   fix.position_covariance[0] = 0.1;
   fix.position_covariance[4] = 0.1;
@@ -391,13 +399,11 @@ bool NavSatTransform::datumCallback(
   setTransformOdometry(odom_ptr);
 
   sensor_msgs::msg::Imu imu;
-  imu.orientation = request->geo_pose.orientation;
+  imu.orientation = manual_datum_geopose_.orientation;
   imu.header.frame_id = base_link_frame_id_;
   sensor_msgs::msg::Imu::SharedPtr imu_ptr =
     std::make_shared<sensor_msgs::msg::Imu>(imu);
   imuCallback(imu_ptr);
-
-  return true;
 }
 
 bool NavSatTransform::toLLCallback(
@@ -407,6 +413,8 @@ bool NavSatTransform::toLLCallback(
   if (!transform_good_) {
     return false;
   }
+  // tf2::Vector3 point;
+  // tf2::fromMsg(request.map_point, point);
   tf2::Vector3 point(request->map_point.x, request->map_point.y,
     request->map_point.z);
   mapToLL(
@@ -680,9 +688,9 @@ void NavSatTransform::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
       // Apply the offset (making sure to bound them), and throw them in a
       // vector
       tf2::Vector3 rpy_angles(
-        angles::normalize_angle(roll - roll_offset),
-        angles::normalize_angle(pitch - pitch_offset),
-        angles::normalize_angle(yaw - yaw_offset));
+        filter_utilities::clampRotation(roll - roll_offset),
+        filter_utilities::clampRotation(pitch - pitch_offset),
+        filter_utilities::clampRotation(yaw - yaw_offset));
 
       // Now we need to rotate the roll and pitch by the yaw offset value.
       // Imagine a case where an IMU is mounted facing sideways. In that case
@@ -705,7 +713,7 @@ void NavSatTransform::odomCallback(
   world_frame_id_ = msg->header.frame_id;
   base_link_frame_id_ = msg->child_frame_id;
 
-  if (!transform_good_ && !use_manual_datum_) {
+  if (!transform_good_) {
     setTransformOdometry(msg);
   }
 

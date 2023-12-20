@@ -2,21 +2,27 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.3.2 (2022-12-11)
+3.5.2 (2023-12-20)
 ------------------
-* Port PR `#753 <https://github.com/cra-ros-pkg/robot_localization/issues/753>`_ and `#728 <https://github.com/cra-ros-pkg/robot_localization/issues/728>`_ to ROS2 version (`#765 <https://github.com/cra-ros-pkg/robot_localization/issues/765>`_)
-  * compiling version of commit `#753 <https://github.com/cra-ros-pkg/robot_localization/issues/753>`_ and `#728 <https://github.com/cra-ros-pkg/robot_localization/issues/728>`_ ported to ros2 rolling
-  * format fixes
-  * fix time source disagreement by converting to seconds beforehand, append parameter usage, fix linting
-  * fix linting and uncrustify
-* Adding support for setting diagonals for covariance matrices (`#755 <https://github.com/cra-ros-pkg/robot_localization/issues/755>`_)
-* Fixing and cleaning up interface tests (`#754 <https://github.com/cra-ros-pkg/robot_localization/issues/754>`_)
-  * Fixing and cleaning up interface tests
-* Linting and header cleanup, part 1 (`#752 <https://github.com/cra-ros-pkg/robot_localization/issues/752>`_)
-  * Header cleanup and logging fixes
-* UKF update (`#751 <https://github.com/cra-ros-pkg/robot_localization/issues/751>`_)
-  * Pulling UKF changes from Noetic
-  * Adding a reset service to make tests more deterministic
+* fix header timestamp (`#852 <https://github.com/cra-ros-pkg/robot_localization/issues/852>`_)
+  Co-authored-by: Luke Chang <luke@boxfish.nz>
+* Wait for odometry message before setting manual datum so that the base and world frame names can be set. (`#835 <https://github.com/cra-ros-pkg/robot_localization/issues/835>`_)
+  * wait for odom msg before setting manual datum
+* Utm using geographiclib humble branch (`#834 <https://github.com/cra-ros-pkg/robot_localization/issues/834>`_)
+  * Add single test for navsat_conversions
+  * Add a southern point to the navsat_transform test
+  * LLtoUTM using GeographicLib
+  * Use GeographicLib for UTMtoLL conversions
+  * Linting
+  * Forgot include
+  * Fix compilation
+  * Calculate gamma because it's a function output and was supplied before
+  * Also test for gamma conversion
+  * Align naming and install
+* Contributors: Luke Chang, Tim Clephas, Tom Greier
+
+3.4.0 (2022-05-05)
+------------------
 * Fix angles dependency (`#747 <https://github.com/cra-ros-pkg/robot_localization/issues/747>`_)
   * Add angles to CMakeLists.txt
 * Using angles library to normalize angles (`#739 <https://github.com/cra-ros-pkg/robot_localization/issues/739>`_)
@@ -27,7 +33,7 @@ Changelog for package robot_localization
   Co-authored-by: Zygfryd Wieszok <zwieszok@autonomous-systems.pl>
 * Fixing code style divergence for ament_uncrustify in main ROS2 branch (`#743 <https://github.com/cra-ros-pkg/robot_localization/issues/743>`_)
 * This fixes `#732 <https://github.com/cra-ros-pkg/robot_localization/issues/732>`_ (broadcast_cartesian_transform) (`#733 <https://github.com/cra-ros-pkg/robot_localization/issues/733>`_)
-* Contributors: Anish, Haoguang Yang, Marek Piechula, RoboTech Vision, Tom Moore, Tony Najjar, Zygfryd Wieszok
+* Contributors: Anish, Marek Piechula, RoboTech Vision, Tony Najjar, Zygfryd Wieszok
 
 3.3.1 (2022-02-25)
 ------------------

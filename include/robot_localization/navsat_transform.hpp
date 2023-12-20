@@ -29,28 +29,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef ROBOT_LOCALIZATION__NAVSAT_TRANSFORM_HPP_
 #define ROBOT_LOCALIZATION__NAVSAT_TRANSFORM_HPP_
 
+#include <robot_localization/srv/set_datum.hpp>
+#include <robot_localization/srv/to_ll.hpp>
+#include <robot_localization/srv/from_ll.hpp>
+
+#include <Eigen/Dense>
+#include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/static_transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
+
 #include <memory>
 #include <string>
-
-#include "Eigen/Dense"
-#include "GeographicLib/LocalCartesian.hpp"
-#include "nav_msgs/msg/odometry.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/timer.hpp"
-#include "robot_localization/srv/from_ll.hpp"
-#include "robot_localization/srv/set_datum.hpp"
-#include "robot_localization/srv/to_ll.hpp"
-#include "sensor_msgs/msg/imu.hpp"
-#include "sensor_msgs/msg/nav_sat_fix.hpp"
-#include "tf2/LinearMath/Quaternion.h"
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/LinearMath/Vector3.h"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/static_transform_broadcaster.h"
-#include "tf2_ros/transform_listener.h"
 
 namespace robot_localization
 {
@@ -176,6 +176,11 @@ private:
   void mapToLL(
     const tf2::Vector3 & point, double & latitude, double & longitude,
     double & altitude) const;
+
+  /**
+   * @brief Sets the manual datum pose to be used by the transform computation
+   */
+  void setManualDatum();
 
   /**
    * @brief Frame ID of the robot's body frame
@@ -433,6 +438,15 @@ private:
    * converted GPS odometry message.
    */
   bool zero_altitude_;
+
+  /**
+   * @brief Manual datum pose to be used by the transform computation
+   *
+   * Then manual datum requested by a service request (or configuration) is stored
+   * here until the odom message is received, and the manual datum pose can be
+   * set.
+   */
+  geographic_msgs::msg::GeoPose manual_datum_geopose_;  
 };
 
 }  // namespace robot_localization
