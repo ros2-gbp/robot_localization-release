@@ -342,5 +342,4 @@ tracks:
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/cra-ros-pkg/robot_localization.git
-    version: 3.6.0
-    version_saved: :{auto}
+    version: :{auto}
