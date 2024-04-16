@@ -1,3 +1,26 @@
+## robot_localization (iron) - 3.7.0-1
+
+The packages in the `robot_localization` repository were released into the `iron` distro by running `/usr/bin/bloom-release -t iron -r iron robot_localization --edit` on `Tue, 16 Apr 2024 15:56:13 -0000`
+
+The `robot_localization` package was released.
+
+Version of package(s) in repository `robot_localization`:
+
+- upstream repository: https://github.com/cra-ros-pkg/robot_localization.git
+- release repository: https://github.com/ros2-gbp/robot_localization-release.git
+- rosdistro version: `3.5.0-3`
+- old version: `3.5.0-3`
+- new version: `3.7.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## robot_localization (rolling) - 3.6.1-1
 
 The packages in the `robot_localization` repository were released into the `rolling` distro by running `/usr/bin/bloom-release -t rolling -r rolling robot_localization` on `Tue, 16 Apr 2024 15:52:22 -0000`
