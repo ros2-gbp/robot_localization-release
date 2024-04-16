@@ -348,7 +348,7 @@ void RosFilter<T>::controlStampedCallback(
     filter_.setControl(latest_control_, msg->header.stamp);
   } else {
     RCLCPP_WARN_STREAM_THROTTLE(
-      get_logger(), *get_clock(), 5.0, "Commanded velocities "
+      get_logger(), *get_clock(), 5000, "Commanded velocities "
       " must be given in the robot's body frame (" << base_link_frame_id_ <<
         "). Message frame was " << msg->header.frame_id);
   }
@@ -899,9 +899,8 @@ void RosFilter<T>::loadParams()
 
   // Try to resolve tf_prefix
   std::string tf_prefix = "";
-  std::string tf_prefix_path = "";
   this->declare_parameter("tf_prefix", rclcpp::PARAMETER_STRING);
-  if (this->get_parameter("tf_prefix", tf_prefix_path)) {
+  if (this->get_parameter("tf_prefix", tf_prefix)) {
     // Append the tf prefix in a tf2-friendly manner
     filter_utilities::appendPrefix(tf_prefix, map_frame_id_);
     filter_utilities::appendPrefix(tf_prefix, odom_frame_id_);
@@ -1857,16 +1856,20 @@ void RosFilter<T>::loadParams()
           RCLCPP_FATAL_STREAM(get_logger(), error);
           throw std::invalid_argument(error);
         }
+        return true;
       }
+      return false;
     };
 
-  load_covariance("process_noise_covariance", process_noise_covariance_);
-  RF_DEBUG("Process noise covariance is:\n" << process_noise_covariance_ << "\n");
-  filter_.setProcessNoiseCovariance(process_noise_covariance_);
+  if (load_covariance("process_noise_covariance", process_noise_covariance_)) {
+    RF_DEBUG("Process noise covariance is:\n" << process_noise_covariance_ << "\n");
+    filter_.setProcessNoiseCovariance(process_noise_covariance_);
+  }
 
-  load_covariance("initial_estimate_covariance", initial_estimate_error_covariance_);
-  RF_DEBUG("Initial estimate covariance is:\n" << initial_estimate_error_covariance_ << "\n");
-  filter_.setEstimateErrorCovariance(initial_estimate_error_covariance_);
+  if (load_covariance("initial_estimate_covariance", initial_estimate_error_covariance_)) {
+    RF_DEBUG("Initial estimate covariance is:\n" << initial_estimate_error_covariance_ << "\n");
+    filter_.setEstimateErrorCovariance(initial_estimate_error_covariance_);
+  }
 }
 
 template<typename T>
@@ -2217,7 +2220,7 @@ void RosFilter<T>::periodicUpdate()
           RCLCPP_ERROR_STREAM_SKIPFIRST_THROTTLE(
             get_logger(),
             *get_clock(),
-            5.0,
+            5000,
             "Could not obtain transform from " << odom_frame_id_ << "->" << base_link_frame_id_);
         }
       } else {
@@ -2861,7 +2864,7 @@ bool RosFilter<T>::preparePose(
 
   pose_tmp.stamp_ = tf2::timeFromSec(
     static_cast<double>(msg->header.stamp.sec) +
-    static_cast<double>(msg->header.stamp.sec) / 1000000000.0);
+    static_cast<double>(msg->header.stamp.nanosec) / 1000000000.0);
 
   // Fill out the position data
   pose_tmp.setOrigin(
