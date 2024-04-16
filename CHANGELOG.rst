@@ -2,6 +2,12 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.5.3 (2024-04-16)
+------------------
+* TF Prefix Bug (`#876 <https://github.com/cra-ros-pkg/robot_localization/issues/876>`_)
+* Fixing angle clamping for humble (`#854 <https://github.com/cra-ros-pkg/robot_localization/issues/854>`_)
+* Contributors: Tom Moore, rafal-gorecki
+
 3.5.2 (2023-12-20)
 ------------------
 * fix header timestamp (`#852 <https://github.com/cra-ros-pkg/robot_localization/issues/852>`_)
