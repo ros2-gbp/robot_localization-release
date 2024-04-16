@@ -2,15 +2,18 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.6.1 (2024-04-16)
+3.7.0 (2024-04-16)
 ------------------
 * TF Prefix Bug (`#876 <https://github.com/cra-ros-pkg/robot_localization/issues/876>`_)
 * Update ukf.yaml to match ekf.yaml (`#867 <https://github.com/cra-ros-pkg/robot_localization/issues/867>`_)
   Add missing *_pose_use_child_frame parameter.
 * Fix throttle duration (`#866 <https://github.com/cra-ros-pkg/robot_localization/issues/866>`_)
+  * Fix throttle duration
 * Migrate static tfs to ros2 format. (`#864 <https://github.com/cra-ros-pkg/robot_localization/issues/864>`_)
 * Update issue templates
 * Feature/set utm service (`#856 <https://github.com/cra-ros-pkg/robot_localization/issues/856>`_)
+  * Forward port Fix/set utm map frame change
+  ---------
 * fix: modify dual_ekf_navsat_example.launch file to remap the correct imu topic (`#857 <https://github.com/cra-ros-pkg/robot_localization/issues/857>`_)
 * fix header timestamp (`#852 <https://github.com/cra-ros-pkg/robot_localization/issues/852>`_)
   Co-authored-by: Luke Chang <luke@boxfish.nz>
