@@ -2,6 +2,9 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.9.0 (2024-04-24)
+------------------
+
 3.8.0 (2024-04-21)
 ------------------
 * Fixing yaml linking in rolling (`#878 <https://github.com/cra-ros-pkg/robot_localization/issues/878>`_)
