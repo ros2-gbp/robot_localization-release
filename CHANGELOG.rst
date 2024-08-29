@@ -2,6 +2,14 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.9.1 (2024-08-29)
+------------------
+* Switch robot_localization to modern CMake idioms. (`#895 <https://github.com/cra-ros-pkg/robot_localization/issues/895>`_)
+* Fix warnings when building against Rolling. (`#896 <https://github.com/cra-ros-pkg/robot_localization/issues/896>`_)
+* Resolve mixing of UTM and local transforms in local cartesian mode (`#886 <https://github.com/cra-ros-pkg/robot_localization/issues/886>`_)
+* Spam the logs a little bit less (`#880 <https://github.com/cra-ros-pkg/robot_localization/issues/880>`_)
+* Contributors: Chris Lalancette, JayHerpin, Tim Clephas
+
 3.9.0 (2024-04-24)
 ------------------
 
