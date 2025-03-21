@@ -92,7 +92,7 @@ RosFilter<T>::RosFilter(const rclcpp::NodeOptions & options)
   toggled_on_(true),
   two_d_mode_(false),
   use_control_(false),
-  stamped_control_(false),
+  stamped_control_(true),
   disabled_at_startup_(false),
   enabled_(false),
   permit_corrected_publication_(false),
@@ -972,7 +972,7 @@ void RosFilter<T>::loadParams()
   std::vector<double> deceleration_gains;
 
   use_control_ = this->declare_parameter("use_control", false);
-  stamped_control_ = this->declare_parameter("stamped_control", false);
+  stamped_control_ = this->declare_parameter("stamped_control", true);
   control_timeout = this->declare_parameter("control_timeout", 0.0);
 
   if (use_control_) {
@@ -1786,7 +1786,7 @@ void RosFilter<T>::loadParams()
       deceleration_gains);
 
     // Select between TwistStamped or Twist control input
-    if (stamped_control_) {
+    if(stamped_control_) {
       stamped_control_sub_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
         "cmd_vel", rclcpp::QoS(1),
         std::bind(&RosFilter<T>::controlStampedCallback, this, std::placeholders::_1));
@@ -1858,7 +1858,7 @@ void RosFilter<T>::loadParams()
             get_logger(), "Detected a " << parameter << " parameter with "
               "length " << STATE_SIZE << ". Assuming diagonal values specified.");
           covariance.diagonal() = Eigen::VectorXd::Map(covar_flat.data(), STATE_SIZE);
-        } else if (covariance.size() == STATE_SIZE * STATE_SIZE) {
+        } else if (covar_flat.size() == STATE_SIZE * STATE_SIZE) {
           covariance = Eigen::MatrixXd::Map(covar_flat.data(), STATE_SIZE, STATE_SIZE);
         } else {
           std::string error = "Invalid " + parameter + " specified. Expected a length of " +

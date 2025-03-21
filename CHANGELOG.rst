@@ -2,27 +2,27 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.8.2 (2025-03-21)
+3.9.2 (2025-03-21)
 ------------------
-* Fix user UTM conversion and catch GeographicErr to not crash navsat_transfrom node (`#917 <https://github.com/cra-ros-pkg/robot_localization/issues/917>`_)
-  * Fix user UTM conversion and catch GeographicErr to not crash navsat_transform node
-  ---------
+* Same change on rolling (`#918 <https://github.com/cra-ros-pkg/robot_localization/issues/918>`_)
   Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
-* Added FromLLArray service (`#912 <https://github.com/cra-ros-pkg/robot_localization/issues/912>`_)
-  * Added FromLLArray service
-  ---------
-  Co-authored-by: Marcin Słomiany <m.slomiany93@gmail.com>
-* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_) (`#900 <https://github.com/cra-ros-pkg/robot_localization/issues/900>`_)
-  * Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
+* Fixing bug with diagonal covariance loading (`#909 <https://github.com/cra-ros-pkg/robot_localization/issues/909>`_)
+* Switching stamped control to default true for rolling/future distributions to align with Nav2 and ROS 2 Control (`#910 <https://github.com/cra-ros-pkg/robot_localization/issues/910>`_)
+* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
+  * Added subscription to stamped topic
 * Fixing IMU differential test (`#897 <https://github.com/cra-ros-pkg/robot_localization/issues/897>`_)
-* Contributors: Ferry Schoenmakers, Jay Herpin, Pablo, Tom Moore
+* Contributors: Ferry Schoenmakers, Pablo, Steve Macenski, Tom Moore
 
-3.8.1 (2024-08-29)
+3.9.1 (2024-08-29)
 ------------------
+* Switch robot_localization to modern CMake idioms. (`#895 <https://github.com/cra-ros-pkg/robot_localization/issues/895>`_)
+* Fix warnings when building against Rolling. (`#896 <https://github.com/cra-ros-pkg/robot_localization/issues/896>`_)
+* Resolve mixing of UTM and local transforms in local cartesian mode (`#886 <https://github.com/cra-ros-pkg/robot_localization/issues/886>`_)
 * Spam the logs a little bit less (`#880 <https://github.com/cra-ros-pkg/robot_localization/issues/880>`_)
-* Fix mixing of UTM and catesian transforms with in use_local_catesian mode (`#884 <https://github.com/cra-ros-pkg/robot_localization/issues/884>`_)
-  * Resolve mixing of UTM and local transforms in local cartesian mode
-* Contributors: JayHerpin, Tim Clephas
+* Contributors: Chris Lalancette, JayHerpin, Tim Clephas
+
+3.9.0 (2024-04-24)
+------------------
 
 3.8.0 (2024-04-21)
 ------------------
