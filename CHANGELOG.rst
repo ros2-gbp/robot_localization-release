@@ -2,24 +2,42 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.7.1 (2024-08-29)
+3.8.2 (2025-03-21)
 ------------------
+* Fix user UTM conversion and catch GeographicErr to not crash navsat_transfrom node (`#917 <https://github.com/cra-ros-pkg/robot_localization/issues/917>`_)
+  * Fix user UTM conversion and catch GeographicErr to not crash navsat_transform node
+  ---------
+  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
+* Added FromLLArray service (`#912 <https://github.com/cra-ros-pkg/robot_localization/issues/912>`_)
+  * Added FromLLArray service
+  ---------
+  Co-authored-by: Marcin Słomiany <m.slomiany93@gmail.com>
+* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_) (`#900 <https://github.com/cra-ros-pkg/robot_localization/issues/900>`_)
+  * Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
+* Fixing IMU differential test (`#897 <https://github.com/cra-ros-pkg/robot_localization/issues/897>`_)
+* Contributors: Ferry Schoenmakers, Jay Herpin, Pablo, Tom Moore
+
+3.8.1 (2024-08-29)
+------------------
+* Spam the logs a little bit less (`#880 <https://github.com/cra-ros-pkg/robot_localization/issues/880>`_)
 * Fix mixing of UTM and catesian transforms with in use_local_catesian mode (`#884 <https://github.com/cra-ros-pkg/robot_localization/issues/884>`_)
-* Spam the logs a little bit less (`#879 <https://github.com/cra-ros-pkg/robot_localization/issues/879>`_)
+  * Resolve mixing of UTM and local transforms in local cartesian mode
 * Contributors: JayHerpin, Tim Clephas
 
-3.7.0 (2024-04-16)
+3.8.0 (2024-04-21)
+------------------
+* Fixing yaml linking in rolling (`#878 <https://github.com/cra-ros-pkg/robot_localization/issues/878>`_)
+* Contributors: Chris Lalancette
+
+3.6.1 (2024-04-16)
 ------------------
 * TF Prefix Bug (`#876 <https://github.com/cra-ros-pkg/robot_localization/issues/876>`_)
 * Update ukf.yaml to match ekf.yaml (`#867 <https://github.com/cra-ros-pkg/robot_localization/issues/867>`_)
   Add missing *_pose_use_child_frame parameter.
 * Fix throttle duration (`#866 <https://github.com/cra-ros-pkg/robot_localization/issues/866>`_)
-  * Fix throttle duration
 * Migrate static tfs to ros2 format. (`#864 <https://github.com/cra-ros-pkg/robot_localization/issues/864>`_)
 * Update issue templates
 * Feature/set utm service (`#856 <https://github.com/cra-ros-pkg/robot_localization/issues/856>`_)
-  * Forward port Fix/set utm map frame change
-  ---------
 * fix: modify dual_ekf_navsat_example.launch file to remap the correct imu topic (`#857 <https://github.com/cra-ros-pkg/robot_localization/issues/857>`_)
 * fix header timestamp (`#852 <https://github.com/cra-ros-pkg/robot_localization/issues/852>`_)
   Co-authored-by: Luke Chang <luke@boxfish.nz>
