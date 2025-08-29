@@ -73,9 +73,9 @@
 #include "tf2/LinearMath/Transform.hpp"
 #include "tf2/LinearMath/Vector3.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/transform_listener.h"
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_broadcaster.hpp>
+#include <tf2_ros/transform_listener.hpp>
 
 namespace robot_localization
 {
@@ -382,6 +382,7 @@ void RosFilter<T>::forceTwoD(
   Eigen::MatrixXd & measurement_covariance,
   std::vector<bool> & update_vector)
 {
+  // Force 3D variables to 0 in the measurement
   measurement(StateMemberZ) = 0.0;
   measurement(StateMemberRoll) = 0.0;
   measurement(StateMemberPitch) = 0.0;
@@ -390,6 +391,24 @@ void RosFilter<T>::forceTwoD(
   measurement(StateMemberVpitch) = 0.0;
   measurement(StateMemberAz) = 0.0;
 
+  // Need to eliminate any off-diagonal covariance values that involve one of our 3D variables
+  measurement_covariance.col(StateMemberZ).fill(0.0);
+  measurement_covariance.col(StateMemberRoll).fill(0.0);
+  measurement_covariance.col(StateMemberPitch).fill(0.0);
+  measurement_covariance.col(StateMemberVz).fill(0.0);
+  measurement_covariance.col(StateMemberVroll).fill(0.0);
+  measurement_covariance.col(StateMemberVpitch).fill(0.0);
+  measurement_covariance.col(StateMemberAz).fill(0.0);
+
+  measurement_covariance.row(StateMemberZ).fill(0.0);
+  measurement_covariance.row(StateMemberRoll).fill(0.0);
+  measurement_covariance.row(StateMemberPitch).fill(0.0);
+  measurement_covariance.row(StateMemberVz).fill(0.0);
+  measurement_covariance.row(StateMemberVroll).fill(0.0);
+  measurement_covariance.row(StateMemberVpitch).fill(0.0);
+  measurement_covariance.row(StateMemberAz).fill(0.0);
+
+  // Now set the diagonal covariance values to something small
   measurement_covariance(StateMemberZ, StateMemberZ) = 1e-6;
   measurement_covariance(StateMemberRoll, StateMemberRoll) = 1e-6;
   measurement_covariance(StateMemberPitch, StateMemberPitch) = 1e-6;
@@ -398,6 +417,7 @@ void RosFilter<T>::forceTwoD(
   measurement_covariance(StateMemberVpitch, StateMemberVpitch) = 1e-6;
   measurement_covariance(StateMemberAz, StateMemberAz) = 1e-6;
 
+  // Finally, update the update vector
   update_vector[StateMemberZ] = 1;
   update_vector[StateMemberRoll] = 1;
   update_vector[StateMemberPitch] = 1;
@@ -1141,7 +1161,7 @@ void RosFilter<T>::loadParams()
   // Create a service for manually enabling the filter
   enable_filter_srv_ =
     this->create_service<std_srvs::srv::Empty>(
-    "enable", std::bind(
+    "~/enable", std::bind(
       &RosFilter::enableFilterSrvCallback, this,
       std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -1156,7 +1176,7 @@ void RosFilter<T>::loadParams()
   // publishing
   toggle_filter_processing_srv_ =
     this->create_service<robot_localization::srv::ToggleFilterProcessing>(
-    "toggle", std::bind(
+    "~/toggle", std::bind(
       &RosFilter<T>::toggleFilterProcessingCallback, this,
       std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -2048,6 +2068,11 @@ void RosFilter<T>::poseCallback(
 template<typename T>
 void RosFilter<T>::initialize()
 {
+  if (!this->get_clock()->started()) {
+    RCLCPP_INFO(get_logger(), "Waiting for clock to start...");
+    this->get_clock()->wait_until_started();
+  }
+
   diagnostic_updater_ = std::make_unique<diagnostic_updater::Updater>(
     shared_from_this());
   diagnostic_updater_->setHardwareID("none");
