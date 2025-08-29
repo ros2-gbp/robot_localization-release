@@ -258,7 +258,7 @@ tracks:
       :{release_inc} --os-name fedora
     - git-bloom-generate -y rosrpm --prefix release/:{ros_distro} :{ros_distro} -i
       :{release_inc} --os-name rhel
-    devel_branch: ros2
+    devel_branch: kilted-devel
     last_version: 3.9.3
     name: robot_localization
     patches: null
