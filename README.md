@@ -1,3 +1,26 @@
+## robot_localization (jazzy) - 3.8.3-1
+
+The packages in the `robot_localization` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release -t jazzy -r jazzy robot_localization` on `Fri, 29 Aug 2025 14:28:37 -0000`
+
+The `robot_localization` package was released.
+
+Version of package(s) in repository `robot_localization`:
+
+- upstream repository: https://github.com/cra-ros-pkg/robot_localization.git
+- release repository: https://github.com/ros2-gbp/robot_localization-release.git
+- rosdistro version: `3.8.2-1`
+- old version: `3.8.2-1`
+- new version: `3.8.3-1`
+
+Versions of tools used:
+
+- bloom version: `0.13.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## robot_localization (kilted) - 3.9.3-1
 
 The packages in the `robot_localization` repository were released into the `kilted` distro by running `/usr/bin/bloom-release robot_localization --rosdistro kilted --track kilted --edit` on `Thu, 29 May 2025 22:14:37 -0000`
