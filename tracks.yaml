@@ -259,7 +259,7 @@ tracks:
     - git-bloom-generate -y rosrpm --prefix release/:{ros_distro} :{ros_distro} -i
       :{release_inc} --os-name rhel
     devel_branch: kilted-devel
-    last_version: 3.9.3
+    last_version: 3.9.4
     name: robot_localization
     patches: null
     release_inc: '1'
