@@ -68,10 +68,10 @@
 #include "robot_localization/ukf.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "std_srvs/srv/empty.hpp"
-#include "tf2/LinearMath/Matrix3x3.hpp"
-#include "tf2/LinearMath/Quaternion.hpp"
-#include "tf2/LinearMath/Transform.hpp"
-#include "tf2/LinearMath/Vector3.hpp"
+#include "tf2/LinearMath/Matrix3x3.h"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2/LinearMath/Transform.h"
+#include "tf2/LinearMath/Vector3.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_broadcaster.h"
@@ -92,7 +92,7 @@ RosFilter<T>::RosFilter(const rclcpp::NodeOptions & options)
   toggled_on_(true),
   two_d_mode_(false),
   use_control_(false),
-  stamped_control_(true),
+  stamped_control_(false),
   disabled_at_startup_(false),
   enabled_(false),
   permit_corrected_publication_(false),
@@ -382,6 +382,7 @@ void RosFilter<T>::forceTwoD(
   Eigen::MatrixXd & measurement_covariance,
   std::vector<bool> & update_vector)
 {
+  // Force 3D variables to 0 in the measurement
   measurement(StateMemberZ) = 0.0;
   measurement(StateMemberRoll) = 0.0;
   measurement(StateMemberPitch) = 0.0;
@@ -390,6 +391,24 @@ void RosFilter<T>::forceTwoD(
   measurement(StateMemberVpitch) = 0.0;
   measurement(StateMemberAz) = 0.0;
 
+  // Need to eliminate any off-diagonal covariance values that involve one of our 3D variables
+  measurement_covariance.col(StateMemberZ).fill(0.0);
+  measurement_covariance.col(StateMemberRoll).fill(0.0);
+  measurement_covariance.col(StateMemberPitch).fill(0.0);
+  measurement_covariance.col(StateMemberVz).fill(0.0);
+  measurement_covariance.col(StateMemberVroll).fill(0.0);
+  measurement_covariance.col(StateMemberVpitch).fill(0.0);
+  measurement_covariance.col(StateMemberAz).fill(0.0);
+
+  measurement_covariance.row(StateMemberZ).fill(0.0);
+  measurement_covariance.row(StateMemberRoll).fill(0.0);
+  measurement_covariance.row(StateMemberPitch).fill(0.0);
+  measurement_covariance.row(StateMemberVz).fill(0.0);
+  measurement_covariance.row(StateMemberVroll).fill(0.0);
+  measurement_covariance.row(StateMemberVpitch).fill(0.0);
+  measurement_covariance.row(StateMemberAz).fill(0.0);
+
+  // Now set the diagonal covariance values to something small
   measurement_covariance(StateMemberZ, StateMemberZ) = 1e-6;
   measurement_covariance(StateMemberRoll, StateMemberRoll) = 1e-6;
   measurement_covariance(StateMemberPitch, StateMemberPitch) = 1e-6;
@@ -398,6 +417,7 @@ void RosFilter<T>::forceTwoD(
   measurement_covariance(StateMemberVpitch, StateMemberVpitch) = 1e-6;
   measurement_covariance(StateMemberAz, StateMemberAz) = 1e-6;
 
+  // Finally, update the update vector
   update_vector[StateMemberZ] = 1;
   update_vector[StateMemberRoll] = 1;
   update_vector[StateMemberPitch] = 1;
@@ -972,7 +992,7 @@ void RosFilter<T>::loadParams()
   std::vector<double> deceleration_gains;
 
   use_control_ = this->declare_parameter("use_control", false);
-  stamped_control_ = this->declare_parameter("stamped_control", true);
+  stamped_control_ = this->declare_parameter("stamped_control", false);
   control_timeout = this->declare_parameter("control_timeout", 0.0);
 
   if (use_control_) {
@@ -1786,7 +1806,7 @@ void RosFilter<T>::loadParams()
       deceleration_gains);
 
     // Select between TwistStamped or Twist control input
-    if(stamped_control_) {
+    if (stamped_control_) {
       stamped_control_sub_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
         "cmd_vel", rclcpp::QoS(1),
         std::bind(&RosFilter<T>::controlStampedCallback, this, std::placeholders::_1));
@@ -1858,7 +1878,7 @@ void RosFilter<T>::loadParams()
             get_logger(), "Detected a " << parameter << " parameter with "
               "length " << STATE_SIZE << ". Assuming diagonal values specified.");
           covariance.diagonal() = Eigen::VectorXd::Map(covar_flat.data(), STATE_SIZE);
-        } else if (covar_flat.size() == STATE_SIZE * STATE_SIZE) {
+        } else if (covariance.size() == STATE_SIZE * STATE_SIZE) {
           covariance = Eigen::MatrixXd::Map(covar_flat.data(), STATE_SIZE, STATE_SIZE);
         } else {
           std::string error = "Invalid " + parameter + " specified. Expected a length of " +
@@ -2048,6 +2068,11 @@ void RosFilter<T>::poseCallback(
 template<typename T>
 void RosFilter<T>::initialize()
 {
+  if (!this->get_clock()->started()) {
+    RCLCPP_INFO(get_logger(), "Waiting for clock to start...");
+    this->get_clock()->wait_until_started();
+  }
+
   diagnostic_updater_ = std::make_unique<diagnostic_updater::Updater>(
     shared_from_this());
   diagnostic_updater_->setHardwareID("none");
