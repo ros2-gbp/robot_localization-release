@@ -70,11 +70,13 @@ NavSatTransform::NavSatTransform(const rclcpp::NodeOptions & options)
   broadcast_cartesian_transform_(false),
   broadcast_cartesian_transform_as_parent_frame_(false),
   gps_frame_id_(""),
+  gps_update_time_(0, 0, RCL_ROS_TIME),
   gps_updated_(false),
   has_transform_gps_(false),
   has_transform_imu_(false),
   has_transform_odom_(false),
   magnetic_declination_(0.0),
+  odom_update_time_(0, 0, RCL_ROS_TIME),
   odom_updated_(false),
   publish_gps_(false),
   transform_good_(false),
@@ -142,6 +144,14 @@ NavSatTransform::NavSatTransform(const rclcpp::NodeOptions & options)
       "broadcast_cartesian_transform_as_parent_frame",
       broadcast_cartesian_transform_as_parent_frame_);
   }
+
+  if (!this->get_clock()->started()) {
+    RCLCPP_INFO(this->get_logger(), "Waiting for clock to start...");
+    this->get_clock()->wait_until_started();
+  }
+
+  parameters_callback_handle_ = this->add_on_set_parameters_callback(
+    std::bind(&NavSatTransform::parametersCallback, this, std::placeholders::_1));
 
   datum_srv_ = this->create_service<robot_localization::srv::SetDatum>(
     "datum", std::bind(&NavSatTransform::datumCallback, this, _1, _2));
@@ -213,10 +223,13 @@ NavSatTransform::NavSatTransform(const rclcpp::NodeOptions & options)
 
   // Sleep for the parameterized amount of time, to give
   // other nodes time to start up (not always necessary)
-  rclcpp::sleep_for(
-    std::chrono::duration_cast<std::chrono::seconds>(
-      std::chrono::duration<double>(
-        delay)));
+  if (delay > 0) {
+    RCLCPP_INFO_STREAM(this->get_logger(),
+        "Delaying for " << delay << " seconds before starting...");
+    rclcpp::Duration delay_duration = rclcpp::Duration::from_seconds(delay);
+    this->get_clock()->sleep_for(delay_duration);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Delay elapsed. Continuing.");
+  }
 
   auto interval = std::chrono::duration<double>(1.0 / frequency);
   timer_ = this->create_wall_timer(interval, std::bind(&NavSatTransform::transformCallback, this));
@@ -228,11 +241,6 @@ void NavSatTransform::transformCallback()
 {
   if (!transform_good_) {
     computeTransform();
-
-    if (transform_good_ && !use_odometry_yaw_ && !use_manual_datum_) {
-      // Once we have the transform, we don't need the IMU
-      imu_sub_.reset();
-    }
   } else {
     auto gps_odom = std::make_unique<nav_msgs::msg::Odometry>();
     if (prepareGpsOdometry(gps_odom.get())) {
@@ -269,7 +277,7 @@ void NavSatTransform::computeTransform()
     if (!use_manual_datum_) {
       getRobotOriginCartesianPose(
         transform_cartesian_pose_, transform_cartesian_pose_corrected,
-        rclcpp::Time(0));
+        rclcpp::Time(0, 0, RCL_ROS_TIME));
     } else {
       transform_cartesian_pose_corrected = transform_cartesian_pose_;
     }
@@ -458,7 +466,7 @@ bool NavSatTransform::fromLLArrayCallback(
   try {
     std::transform(request->ll_points.begin(), request->ll_points.end(),
                    std::back_inserter(converted_points),
-                   [this] (const auto& point) { return fromLL(point); });
+      [this] (const auto & point) {return fromLL(point);});
   } catch(const std::runtime_error & e) {
     return false;
   }
@@ -753,6 +761,10 @@ void NavSatTransform::gpsFixCallback(
 
 void NavSatTransform::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
 {
+  if (transform_good_ && !use_odometry_yaw_ && !use_manual_datum_) {
+    return;
+  }
+
   // We need the baseLinkFrameId_ from the odometry message, so
   // we need to wait until we receive it.
   if (has_transform_odom_) {
@@ -890,7 +902,7 @@ bool NavSatTransform::prepareGpsOdometry(nav_msgs::msg::Odometry * gps_odom)
     tf2::Transform transformed_cartesian_robot;
     rclcpp::Time time(static_cast<double>(gps_odom->header.stamp.sec) +
       static_cast<double>(gps_odom->header.stamp.nanosec) /
-      1000000000.0);
+      1000000000.0, RCL_ROS_TIME);
     getRobotOriginWorldPose(transformed_cartesian_gps, transformed_cartesian_robot, time);
 
     // Rotate the covariance as well
@@ -1003,6 +1015,26 @@ void NavSatTransform::setTransformOdometry(
       std::make_shared<sensor_msgs::msg::Imu>(imu);
     imuCallback(imuPtr);
   }
+}
+
+rcl_interfaces::msg::SetParametersResult NavSatTransform::parametersCallback(
+  const std::vector<rclcpp::Parameter> & parameters)
+{
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  result.reason = "success";
+  // Here update class attributes
+  for (const auto & param : parameters) {
+    if (param.get_name() == "magnetic_declination_radians") {
+      magnetic_declination_ = param.as_double();
+
+      // Set back transform_good_ to false to recalculate the transform
+      transform_good_ = false;
+      RCLCPP_INFO(
+        this->get_logger(), "The new magnetic declination is (%f) rads", magnetic_declination_);
+    }
+  }
+  return result;
 }
 
 }  // namespace robot_localization
