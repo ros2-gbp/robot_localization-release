@@ -2,8 +2,8 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.9.4 (2025-08-29)
-------------------
+3.10.0 (2025-08-29)
+-------------------
 * Added FromLLArray service (`#912 <https://github.com/cra-ros-pkg/robot_localization/issues/912>`_)
   * Added FromLLArray service
   ---------
@@ -12,7 +12,9 @@ Changelog for package robot_localization
 * Backporting IMU sub reset fix
 * Fixing ROS time sources (`#943 <https://github.com/cra-ros-pkg/robot_localization/issues/943>`_)
 * Fixing off-diagonal covariance values in measurement (`#942 <https://github.com/cra-ros-pkg/robot_localization/issues/942>`_)
-* Contributors: Enzo Ghisoni, Jay Herpin, Tom Moore
+* "toggle" and "enable" services are now namespaced (`#940 <https://github.com/cra-ros-pkg/robot_localization/issues/940>`_)
+* chore: tf2_ros to hpp headers (`#941 <https://github.com/cra-ros-pkg/robot_localization/issues/941>`_)
+* Contributors: Enzo Ghisoni, Jay Herpin, Tim Clephas, Tom Moore, ari-bw
 
 3.9.3 (2025-05-19)
 ------------------

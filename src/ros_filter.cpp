@@ -73,9 +73,9 @@
 #include "tf2/LinearMath/Transform.hpp"
 #include "tf2/LinearMath/Vector3.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/transform_listener.h"
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_broadcaster.hpp>
+#include <tf2_ros/transform_listener.hpp>
 
 namespace robot_localization
 {
@@ -1161,7 +1161,7 @@ void RosFilter<T>::loadParams()
   // Create a service for manually enabling the filter
   enable_filter_srv_ =
     this->create_service<std_srvs::srv::Empty>(
-    "enable", std::bind(
+    "~/enable", std::bind(
       &RosFilter::enableFilterSrvCallback, this,
       std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -1176,7 +1176,7 @@ void RosFilter<T>::loadParams()
   // publishing
   toggle_filter_processing_srv_ =
     this->create_service<robot_localization::srv::ToggleFilterProcessing>(
-    "toggle", std::bind(
+    "~/toggle", std::bind(
       &RosFilter<T>::toggleFilterProcessingCallback, this,
       std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
