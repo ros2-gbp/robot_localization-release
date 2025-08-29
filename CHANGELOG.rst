@@ -2,59 +2,29 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.8.3 (2025-08-29)
+3.5.4 (2025-08-29)
 ------------------
+* Backporting IMU sub reset fix
+* Fixing off-diagonal covariance values in measurement (`#942 <https://github.com/cra-ros-pkg/robot_localization/issues/942>`_)
 * Add a Parameters Callback to set magnetic_declination_radians at runtime (`#920 <https://github.com/cra-ros-pkg/robot_localization/issues/920>`_)
   * Add a Parameters Callback to be able to set magnetic_declination_radians value at runtime.
-* Fixing issue with subscriber disconnect (`#944 <https://github.com/cra-ros-pkg/robot_localization/issues/944>`_)
-  * Fixing issue with subscriber disconnect
-* Fixing ROS time sources (`#943 <https://github.com/cra-ros-pkg/robot_localization/issues/943>`_)
-* Fixing off-diagonal covariance values in measurement (`#942 <https://github.com/cra-ros-pkg/robot_localization/issues/942>`_)
-* Contributors: Enzo Ghisoni, Tom Moore
-
-3.8.2 (2025-03-21)
-------------------
-* Fix user UTM conversion and catch GeographicErr to not crash navsat_transfrom node (`#917 <https://github.com/cra-ros-pkg/robot_localization/issues/917>`_)
-  * Fix user UTM conversion and catch GeographicErr to not crash navsat_transform node
-  ---------
-  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
-* Added FromLLArray service (`#912 <https://github.com/cra-ros-pkg/robot_localization/issues/912>`_)
-  * Added FromLLArray service
-  ---------
-  Co-authored-by: Marcin Słomiany <m.slomiany93@gmail.com>
-* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_) (`#900 <https://github.com/cra-ros-pkg/robot_localization/issues/900>`_)
+* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_) (`#899 <https://github.com/cra-ros-pkg/robot_localization/issues/899>`_)
   * Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
-* Fixing IMU differential test (`#897 <https://github.com/cra-ros-pkg/robot_localization/issues/897>`_)
-* Contributors: Ferry Schoenmakers, Jay Herpin, Pablo, Tom Moore
+* Contributors: Enzo Ghisoni, Pablo, Tom Moore
 
-3.8.1 (2024-08-29)
-------------------
-* Spam the logs a little bit less (`#880 <https://github.com/cra-ros-pkg/robot_localization/issues/880>`_)
-* Fix mixing of UTM and catesian transforms with in use_local_catesian mode (`#884 <https://github.com/cra-ros-pkg/robot_localization/issues/884>`_)
-  * Resolve mixing of UTM and local transforms in local cartesian mode
-* Contributors: JayHerpin, Tim Clephas
-
-3.8.0 (2024-04-21)
-------------------
-* Fixing yaml linking in rolling (`#878 <https://github.com/cra-ros-pkg/robot_localization/issues/878>`_)
-* Contributors: Chris Lalancette
-
-3.6.1 (2024-04-16)
+3.5.3 (2024-04-16)
 ------------------
 * TF Prefix Bug (`#876 <https://github.com/cra-ros-pkg/robot_localization/issues/876>`_)
-* Update ukf.yaml to match ekf.yaml (`#867 <https://github.com/cra-ros-pkg/robot_localization/issues/867>`_)
-  Add missing *_pose_use_child_frame parameter.
-* Fix throttle duration (`#866 <https://github.com/cra-ros-pkg/robot_localization/issues/866>`_)
-* Migrate static tfs to ros2 format. (`#864 <https://github.com/cra-ros-pkg/robot_localization/issues/864>`_)
-* Update issue templates
-* Feature/set utm service (`#856 <https://github.com/cra-ros-pkg/robot_localization/issues/856>`_)
-* fix: modify dual_ekf_navsat_example.launch file to remap the correct imu topic (`#857 <https://github.com/cra-ros-pkg/robot_localization/issues/857>`_)
+* Fixing angle clamping for humble (`#854 <https://github.com/cra-ros-pkg/robot_localization/issues/854>`_)
+* Contributors: Tom Moore, rafal-gorecki
+
+3.5.2 (2023-12-20)
+------------------
 * fix header timestamp (`#852 <https://github.com/cra-ros-pkg/robot_localization/issues/852>`_)
   Co-authored-by: Luke Chang <luke@boxfish.nz>
-* Wait for odometry message before setting manual datum so that the base and world frame names can be set. (`#836 <https://github.com/cra-ros-pkg/robot_localization/issues/836>`_)
+* Wait for odometry message before setting manual datum so that the base and world frame names can be set. (`#835 <https://github.com/cra-ros-pkg/robot_localization/issues/835>`_)
   * wait for odom msg before setting manual datum
-* Test navsat transform functionality (`#838 <https://github.com/cra-ros-pkg/robot_localization/issues/838>`_)
-* Utm using geographiclib ros2 branch (`#833 <https://github.com/cra-ros-pkg/robot_localization/issues/833>`_)
+* Utm using geographiclib humble branch (`#834 <https://github.com/cra-ros-pkg/robot_localization/issues/834>`_)
   * Add single test for navsat_conversions
   * Add a southern point to the navsat_transform test
   * LLtoUTM using GeographicLib
@@ -65,24 +35,10 @@ Changelog for package robot_localization
   * Calculate gamma because it's a function output and was supplied before
   * Also test for gamma conversion
   * Align naming and install
-* bugfix (`#809 <https://github.com/cra-ros-pkg/robot_localization/issues/809>`_): check if covariance values are specified or not (`#810 <https://github.com/cra-ros-pkg/robot_localization/issues/810>`_)
-* Contributors: Daisuke Sato, Luke Chang, Mukunda Bharatheesha, Tim Clephas, Tom Greier, Tom Moore, joeldushouyu, rafal-gorecki, thandal
+* Contributors: Luke Chang, Tim Clephas, Tom Greier
 
-3.3.2 (2022-12-11)
+3.4.0 (2022-05-05)
 ------------------
-* Port PR `#753 <https://github.com/cra-ros-pkg/robot_localization/issues/753>`_ and `#728 <https://github.com/cra-ros-pkg/robot_localization/issues/728>`_ to ROS2 version (`#765 <https://github.com/cra-ros-pkg/robot_localization/issues/765>`_)
-  * compiling version of commit `#753 <https://github.com/cra-ros-pkg/robot_localization/issues/753>`_ and `#728 <https://github.com/cra-ros-pkg/robot_localization/issues/728>`_ ported to ros2 rolling
-  * format fixes
-  * fix time source disagreement by converting to seconds beforehand, append parameter usage, fix linting
-  * fix linting and uncrustify
-* Adding support for setting diagonals for covariance matrices (`#755 <https://github.com/cra-ros-pkg/robot_localization/issues/755>`_)
-* Fixing and cleaning up interface tests (`#754 <https://github.com/cra-ros-pkg/robot_localization/issues/754>`_)
-  * Fixing and cleaning up interface tests
-* Linting and header cleanup, part 1 (`#752 <https://github.com/cra-ros-pkg/robot_localization/issues/752>`_)
-  * Header cleanup and logging fixes
-* UKF update (`#751 <https://github.com/cra-ros-pkg/robot_localization/issues/751>`_)
-  * Pulling UKF changes from Noetic
-  * Adding a reset service to make tests more deterministic
 * Fix angles dependency (`#747 <https://github.com/cra-ros-pkg/robot_localization/issues/747>`_)
   * Add angles to CMakeLists.txt
 * Using angles library to normalize angles (`#739 <https://github.com/cra-ros-pkg/robot_localization/issues/739>`_)
@@ -93,7 +49,7 @@ Changelog for package robot_localization
   Co-authored-by: Zygfryd Wieszok <zwieszok@autonomous-systems.pl>
 * Fixing code style divergence for ament_uncrustify in main ROS2 branch (`#743 <https://github.com/cra-ros-pkg/robot_localization/issues/743>`_)
 * This fixes `#732 <https://github.com/cra-ros-pkg/robot_localization/issues/732>`_ (broadcast_cartesian_transform) (`#733 <https://github.com/cra-ros-pkg/robot_localization/issues/733>`_)
-* Contributors: Anish, Haoguang Yang, Marek Piechula, RoboTech Vision, Tom Moore, Tony Najjar, Zygfryd Wieszok
+* Contributors: Anish, Marek Piechula, RoboTech Vision, Tony Najjar, Zygfryd Wieszok
 
 3.3.1 (2022-02-25)
 ------------------
