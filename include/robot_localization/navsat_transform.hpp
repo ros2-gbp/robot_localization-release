@@ -33,17 +33,8 @@
 #ifndef ROBOT_LOCALIZATION__NAVSAT_TRANSFORM_HPP_
 #define ROBOT_LOCALIZATION__NAVSAT_TRANSFORM_HPP_
 
-#include <robot_localization/srv/set_datum.hpp>
-#include <robot_localization/srv/to_ll.hpp>
-#include <robot_localization/srv/from_ll.hpp>
-
 #include <Eigen/Dense>
-#include <GeographicLib/Geocentric.hpp>
-#include <GeographicLib/LocalCartesian.hpp>
-#include <nav_msgs/msg/odometry.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/imu.hpp>
-#include <sensor_msgs/msg/nav_sat_fix.hpp>
+
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/static_transform_broadcaster.h>
@@ -51,6 +42,18 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include <robot_localization/srv/set_datum.hpp>
+#include <robot_localization/srv/to_ll.hpp>
+#include <robot_localization/srv/from_ll.hpp>
+
+#include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
 
 namespace robot_localization
 {
@@ -136,6 +139,13 @@ private:
    * @param[in] msg The odometry message to process
    */
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+
+  /**
+   * @brief Callback for parameters update
+   * @param[in] msg The parameter list to update
+   */
+  rcl_interfaces::msg::SetParametersResult parametersCallback(
+    const std::vector<rclcpp::Parameter> & parameters);
 
   /**
    * @brief Converts the odometry data back to GPS and broadcasts it
@@ -272,6 +282,10 @@ private:
    */
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
 
+  /**
+   * @brief Parameters Callback handle
+   */
+  OnSetParametersCallbackHandle::SharedPtr parameters_callback_handle_;
   /**
    * @brief Covariance for most recent odometry data
    */
@@ -446,7 +460,7 @@ private:
    * here until the odom message is received, and the manual datum pose can be
    * set.
    */
-  geographic_msgs::msg::GeoPose manual_datum_geopose_;  
+  geographic_msgs::msg::GeoPose manual_datum_geopose_;
 };
 
 }  // namespace robot_localization
