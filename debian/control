@@ -1,0 +1,12 @@
+Source: ros-lyrical-robot-localization
+Section: misc
+Priority: optional
+Maintainer: Tom Moore <ayrton04@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), libboost-dev, libeigen3-dev, libgeographiclib-dev, ros-lyrical-ament-cmake, ros-lyrical-ament-cmake-gtest <!nocheck>, ros-lyrical-ament-lint-auto <!nocheck>, ros-lyrical-ament-lint-common <!nocheck>, ros-lyrical-angles, ros-lyrical-builtin-interfaces, ros-lyrical-diagnostic-msgs, ros-lyrical-diagnostic-updater, ros-lyrical-geographic-msgs, ros-lyrical-geometry-msgs, ros-lyrical-launch-ros <!nocheck>, ros-lyrical-launch-testing-ament-cmake <!nocheck>, ros-lyrical-message-filters, ros-lyrical-nav-msgs, ros-lyrical-rclcpp, ros-lyrical-rosidl-default-generators, ros-lyrical-sensor-msgs, ros-lyrical-std-msgs, ros-lyrical-std-srvs, ros-lyrical-tf2, ros-lyrical-tf2-eigen, ros-lyrical-tf2-geometry-msgs, ros-lyrical-tf2-ros, ros-lyrical-yaml-cpp-vendor, ros-lyrical-ros-workspace, ros-lyrical-rosidl-typesupport-fastrtps-c, ros-lyrical-rosidl-typesupport-fastrtps-cpp
+Homepage: http://ros.org/wiki/robot_localization
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-robot-localization
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-dev, libeigen3-dev, libgeographiclib-dev, ros-lyrical-angles, ros-lyrical-builtin-interfaces, ros-lyrical-diagnostic-msgs, ros-lyrical-diagnostic-updater, ros-lyrical-geographic-msgs, ros-lyrical-geometry-msgs, ros-lyrical-message-filters, ros-lyrical-nav-msgs, ros-lyrical-rclcpp, ros-lyrical-rosidl-default-runtime, ros-lyrical-sensor-msgs, ros-lyrical-std-msgs, ros-lyrical-std-srvs, ros-lyrical-tf2, ros-lyrical-tf2-eigen, ros-lyrical-tf2-geometry-msgs, ros-lyrical-tf2-ros, ros-lyrical-yaml-cpp-vendor, ros-lyrical-ros-workspace
+Description: Provides nonlinear state estimation through sensor fusion of an abritrary number of sensors.
