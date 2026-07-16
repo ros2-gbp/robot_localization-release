@@ -26,6 +26,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -96,6 +97,7 @@ target_link_libraries(${library_name} PUBLIC
   tf2_eigen::tf2_eigen
   tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 target_link_libraries(${library_name} PRIVATE
   ${GeographicLib_LIBRARIES}
@@ -109,6 +111,7 @@ add_executable(
 target_link_libraries(ekf_node PRIVATE
   ${library_name}
   rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 
 add_executable(
@@ -118,6 +121,7 @@ add_executable(
 target_link_libraries(ukf_node PRIVATE
   ${library_name}
   rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 
 add_executable(
@@ -268,6 +272,10 @@ if(BUILD_TESTING)
   target_include_directories(test_navsat_conversions PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
   target_link_libraries(test_navsat_conversions ${library_name} ${GeographicLib_LIBRARIES})
 
+  #### EARTH CHAIN TESTS ####
+  ament_add_gtest(test_earth_chain test/test_earth_chain.cpp)
+  target_link_libraries(test_earth_chain ${library_name})
+
   ament_add_gtest_executable(test_ros_robot_localization_listener
                   test/test_ros_robot_localization_listener.cpp)
   target_link_libraries(test_ros_robot_localization_listener ${library_name})
@@ -303,6 +311,7 @@ if(BUILD_TESTING)
     #test_ekf_localization_node_bag3
     test_robot_localization_estimator
     test_navsat_conversions
+    test_earth_chain
     test_ros_robot_localization_listener
     test_ros_robot_localization_listener_publisher
     #test_ukf_localization_node_bag1
@@ -361,6 +370,7 @@ ament_export_dependencies(
   message_filters
   nav_msgs
   rclcpp
+  rclcpp_lifecycle
   rosidl_default_runtime
   sensor_msgs
   std_msgs
