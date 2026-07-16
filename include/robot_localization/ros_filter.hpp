@@ -52,6 +52,8 @@
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "robot_localization/filter_state.hpp"
 #include "robot_localization/measurement.hpp"
 #include "robot_localization/srv/toggle_filter_processing.hpp"
@@ -95,7 +97,7 @@ using MeasurementHistoryDeque = std::deque<MeasurementPtr>;
 using FilterStateHistoryDeque = std::deque<FilterStatePtr>;
 
 template<class T>
-class RosFilter : public rclcpp::Node
+class RosFilter : public rclcpp_lifecycle::LifecycleNode
 {
 public:
   //! @brief Constructor
@@ -110,6 +112,42 @@ public:
   //! Clears out the message filters and topic subscribers.
   //!
   ~RosFilter();
+
+  //! @brief Lifecycle transition callback for Configuring state
+  //!
+  //! Loads parameters and prepares the filter for activation
+  //!
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_configure(const rclcpp_lifecycle::State &);
+
+  //! @brief Lifecycle transition callback for Activating state
+  //!
+  //! Creates publishers, subscribers, services, and starts the filter timer
+  //!
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_activate(const rclcpp_lifecycle::State &);
+
+  //! @brief Lifecycle transition callback for Deactivating state
+  //!
+  //! Stops the filter timer and deactivates publishers
+  //!
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_deactivate(const rclcpp_lifecycle::State &);
+
+  //! @brief Lifecycle transition callback for CleaningUp state
+  //!
+  //! Cleans up resources and resets the filter
+  //!
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_cleanup(const rclcpp_lifecycle::State &);
+
+  //! @brief Lifecycle transition callback for ShuttingDown state
+  //!
+  //! Performs final cleanup before node shutdown
+  //!
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_shutdown(const rclcpp_lifecycle::State &);
+
 
   //! @brief Resets the filter to its initial state
   //!
@@ -285,10 +323,6 @@ public:
     const CallbackData & callback_data, const std::string & target_frame,
     const std::string & pose_source_frame,
     const bool imu_data);
-
-  //! @brief initialize the filter
-  //!
-  void initialize();
 
   //! @brief Service callback for resetting the filter to its initial state. Parameters are unused.
   //!
@@ -690,7 +724,7 @@ protected:
 
   //! @brief Covariance of the calculated angular acceleration
   //!
-  Eigen::MatrixXd angular_acceleration_cov_;
+  Eigen::Matrix3d angular_acceleration_cov_;
 
   //! @brief Stores the first measurement from each topic for relative
   //! measurements
@@ -762,10 +796,16 @@ protected:
   //!
   rclcpp::Time latest_control_time_;
 
-  //! @brief Parameter that specifies the how long we wait for a transform to
+  //! @brief Parameter that specifies how long we wait for a transform to
   //! become available.
   //!
   rclcpp::Duration tf_timeout_;
+
+  //! @brief Parameter that specifies how long we wait for the odom->base_link
+  //! transform to become available. Only relevant when the world_frame is the same
+  //! as the map_frame and publish_tf is set to true.
+  //!
+  rclcpp::Duration tf_timeout_odom_bl_;
 
   //! @brief For future (or past) dating the world_frame->base_link_frame
   //! transform
@@ -826,11 +866,11 @@ protected:
 
   //! @brief Position publisher
   //!
-  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr position_pub_;
+  rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Odometry>::SharedPtr position_pub_;
 
   //! Acceleration publisher
   //!
-  rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
+  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
     accel_pub_;
 
   //! @brief Our filter (EKF, UKF, etc.)
