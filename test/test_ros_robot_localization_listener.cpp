@@ -36,18 +36,14 @@
 #include "rclcpp/rclcpp.hpp"
 #include "robot_localization/filter_common.hpp"
 #include "robot_localization/ros_robot_localization_listener.hpp"
-#include <tf2_ros/static_transform_broadcaster.hpp>
+#include "tf2_ros/static_transform_broadcaster.h"
 
 std::shared_ptr<rclcpp::Node> node;
 std::unique_ptr<robot_localization::RosRobotLocalizationListener> g_listener;
 
 TEST(LocalizationListenerTest, testGetStateOfBaseLink)
 {
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node);
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
 
   rclcpp::Time time2(1001, 0);
 
@@ -73,11 +69,7 @@ TEST(LocalizationListenerTest, testGetStateOfBaseLink)
 
 TEST(LocalizationListenerTest, GetStateOfRelatedFrame)
 {
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node);
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
 
   Eigen::VectorXd state(robot_localization::STATE_SIZE);
   Eigen::MatrixXd covariance(robot_localization::STATE_SIZE, robot_localization::STATE_SIZE);

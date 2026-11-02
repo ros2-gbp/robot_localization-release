@@ -33,19 +33,16 @@ def generate_launch_description():
     parameters_file_path = parameters_file_dir / 'test_filter_base_diagnostics_timestamps.yaml'    
     os.environ['FILE_PATH'] = str(parameters_file_dir)
 
-    ekf_node = launch_ros.actions.LifecycleNode(
+    ekf_node = launch_ros.actions.Node(
         package='robot_localization',
         executable='ekf_node',
         name='test_filter_base_diagnostics_timestamps',
-        namespace='',
         output='screen',
         parameters=[
-            parameters_file_path,
-            str(parameters_file_path),
-            [EnvironmentVariable(name='FILE_PATH'), os.sep, 'test_filter_base_diagnostics_timestamps.yaml'],
-        ],
-        autostart=True,
-    )
+        parameters_file_path,
+        str(parameters_file_path),
+        [EnvironmentVariable(name='FILE_PATH'), os.sep, 'test_filter_base_diagnostics_timestamps.yaml'],
+       ],)
 
     return LaunchDescription([
         ekf_node,

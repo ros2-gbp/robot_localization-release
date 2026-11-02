@@ -14,7 +14,6 @@ robot_localization wiki
    configuring_robot_localization
    migrating_from_robot_pose_ekf
    integrating_gps
-   lifecycle_support
    CHANGELOG
 
 Features

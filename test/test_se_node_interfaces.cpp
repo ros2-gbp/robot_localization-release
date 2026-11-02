@@ -43,9 +43,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "std_srvs/srv/empty.hpp"
-#include "lifecycle_msgs/srv/change_state.hpp"
-#include "lifecycle_msgs/srv/get_state.hpp"
-#include "tf2/LinearMath/Quaternion.hpp"
+#include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 using namespace std::chrono_literals;
@@ -72,17 +70,10 @@ void filterCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   state_updated_ = true;
 }
 
-void spinNodeSome()
-{
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node_);
-  executor.spin_some();
-}
-
 void resetFilter()
 {
   // Force any callbacks to fire in the UKF
-  spinNodeSome();
+  rclcpp::spin_some(node_);
 
   auto reset_request = std::make_shared<std_srvs::srv::Empty::Request>();
   auto result = reset_client_->async_send_request(reset_request);
@@ -112,7 +103,7 @@ TEST(InterfacesTest, OdomPoseBasicIO) {
     odom.header.stamp = node_->now();
     odom0_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -147,7 +138,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -162,7 +153,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.y - odom.twist.twist.linear.y), 0.1);
@@ -177,7 +168,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.z - odom.twist.twist.linear.z), 0.1);
@@ -193,7 +184,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -211,7 +202,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   odom.twist.twist.angular.x = 0.0;
@@ -222,7 +213,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   odom.twist.twist.angular.y = 0.0;
@@ -235,7 +226,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -264,7 +255,7 @@ TEST(InterfacesTest, PoseBasicIO) {
     pose.header.stamp = node_->now();
     pose0_pub_->publish(pose);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -297,7 +288,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -312,7 +303,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(
@@ -329,7 +320,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(
@@ -346,7 +337,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -363,7 +354,7 @@ TEST(InterfacesTest, TwistBasicIO) {
   for (size_t i = 0; i < 100; ++i) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }
@@ -375,7 +366,7 @@ TEST(InterfacesTest, TwistBasicIO) {
   for (size_t i = 0; i < 100; ++i) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }
@@ -390,7 +381,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -418,7 +409,7 @@ TEST(InterfacesTest, ImuPoseBasicIO) {
     imu.header.stamp = node_->now();
     imu0_pub_->publish(imu);
     loop_rate1.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -452,7 +443,7 @@ TEST(InterfacesTest, ImuPoseBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu0_pub_->publish(imuIgnore);
     loop_rate2.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     EXPECT_FALSE(state_updated_);
   }
 
@@ -482,7 +473,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -511,9 +502,9 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
-  spinNodeSome();
+  rclcpp::spin_some(node_);
 
   // Now check the values from the callback
   tf2::fromMsg(filtered_.pose.pose.orientation, quat);
@@ -533,7 +524,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -561,7 +552,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu1_pub_->publish(imuIgnore);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   tf2::fromMsg(filtered_.pose.pose.orientation, quat);
@@ -592,7 +583,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imu.header.stamp = node_->now();
     imu2_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - 1.0), 0.40);
@@ -608,7 +599,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imu.header.stamp = node_->now();
     imu2_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1.8), 0.6);
@@ -631,7 +622,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu2_pub_->publish(imuIgnore);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     EXPECT_FALSE(state_updated_);
   }
 
@@ -668,7 +659,7 @@ TEST(InterfacesTest, OdomDifferentialIO) {
   while (zeroCount++ < 10) {
     odom.header.stamp = node_->now();
     odom1_pub_->publish(odom);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     EXPECT_LT(std::abs(filtered_.pose.pose.position.x), 0.01);
     EXPECT_LT(std::abs(filtered_.pose.pose.position.y), 0.01);
@@ -694,7 +685,7 @@ TEST(InterfacesTest, OdomDifferentialIO) {
     odom.header.stamp = node_->now();
     odom1_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1), 0.2);
@@ -727,7 +718,7 @@ TEST(InterfacesTest, PoseDifferentialIO) {
   while (zeroCount++ < 10) {
     pose.header.stamp = node_->now();
     pose1_pub_->publish(pose);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     EXPECT_LT(std::abs(filtered_.pose.pose.position.x), 0.01);
     EXPECT_LT(std::abs(filtered_.pose.pose.position.y), 0.01);
@@ -754,7 +745,7 @@ TEST(InterfacesTest, PoseDifferentialIO) {
     pose.header.stamp = node_->now();
     pose1_pub_->publish(pose);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1), 0.2);
@@ -791,11 +782,11 @@ TEST(InterfacesTest, ImuDifferentialIO) {
     imu.header.stamp = node_->now();
 
     imu0_pub_->publish(imu);  // Use this to move the absolute orientation
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     set_rate.sleep();
 
     imu1_pub_->publish(imu);  // Use this to keep velocities at 0
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     set_rate.sleep();
   }
 
@@ -804,7 +795,7 @@ TEST(InterfacesTest, ImuDifferentialIO) {
   while (zeroCount++ < 10) {
     imu.header.stamp = node_->now();
     imu3_pub_->publish(imu);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     rclcpp::Rate(10).sleep();
   }
 
@@ -819,7 +810,7 @@ TEST(InterfacesTest, ImuDifferentialIO) {
     imu.orientation = tf2::toMsg(current_quat);
     imu.header.stamp = node_->now();
     imu3_pub_->publish(imu);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }
@@ -874,102 +865,6 @@ int main(int argc, char ** argv)
     "/odometry/filtered", rclcpp::QoS(1), filterCallback);
 
   reset_client_ = node_->create_client<std_srvs::srv::Empty>("reset");
-  auto change_state_client =
-    node_->create_client<lifecycle_msgs::srv::ChangeState>(
-    "/test_se_node_interfaces/change_state");
-  auto get_state_client =
-    node_->create_client<lifecycle_msgs::srv::GetState>(
-    "/test_se_node_interfaces/get_state");
-
-  if (!get_state_client->wait_for_service(10s)) {
-    RCLCPP_ERROR(node_->get_logger(), "Lifecycle get_state service not available after waiting");
-    return 1;
-  }
-
-  if (!change_state_client->wait_for_service(10s)) {
-    RCLCPP_ERROR(node_->get_logger(), "Lifecycle change_state service not available after waiting");
-    return 1;
-  }
-
-  auto get_state = [&]() -> uint8_t {
-      auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
-      auto future = get_state_client->async_send_request(request);
-      if (rclcpp::spin_until_future_complete(node_, future, 1s) ==
-        rclcpp::FutureReturnCode::SUCCESS)
-      {
-        return future.get()->current_state.id;
-      }
-      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
-    };
-
-  auto wait_for_state = [&](uint8_t desired, std::chrono::seconds timeout) -> bool {
-      const auto start = std::chrono::steady_clock::now();
-      while (rclcpp::ok() &&
-        (std::chrono::steady_clock::now() - start) < timeout)
-      {
-        if (get_state() == desired) {
-          return true;
-        }
-        rclcpp::Rate(5.0).sleep();
-      }
-      return false;
-    };
-
-  // Transition lifecycle node to configured, then active.
-  auto change_state = [&](uint8_t transition_id) -> bool {
-      auto req = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-      req->transition.id = transition_id;
-      auto future = change_state_client->async_send_request(req);
-      return rclcpp::spin_until_future_complete(node_, future, 5s) ==
-             rclcpp::FutureReturnCode::SUCCESS && future.get()->success;
-    };
-
-  uint8_t state = get_state();
-  if (state == lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN) {
-    // Give the lifecycle services a moment to report a valid state.
-    if (!wait_for_state(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED, 5s)) {
-      RCLCPP_ERROR(node_->get_logger(), "Lifecycle node state is unknown");
-      return 1;
-    }
-    state = get_state();
-  }
-  if (state == lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED) {
-    if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE)) {
-      state = get_state();
-      if (state != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE &&
-        state != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE)
-      {
-        RCLCPP_ERROR(node_->get_logger(), "Failed to configure lifecycle node");
-        return 1;
-      }
-      RCLCPP_WARN(
-        node_->get_logger(), "Configure transition reported failure but node is configured");
-    }
-  }
-  if (!wait_for_state(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, 10s) &&
-    !wait_for_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, 1s))
-  {
-    RCLCPP_ERROR(node_->get_logger(), "Lifecycle node did not reach inactive state");
-    return 1;
-  }
-
-  state = get_state();
-  if (state != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
-    if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE)) {
-      state = get_state();
-      if (state != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
-        RCLCPP_ERROR(node_->get_logger(), "Failed to activate lifecycle node");
-        return 1;
-      }
-      RCLCPP_WARN(
-        node_->get_logger(),
-        "Activate transition reported failure but node is active");
-    }
-  }
-  if (!wait_for_state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, 10s)) {
-    RCLCPP_ERROR(node_->get_logger(), "Lifecycle node did not reach active state");
-    return 1;
-  }
 
   if (!reset_client_->wait_for_service(10s)) {
     RCLCPP_ERROR(node_->get_logger(), "Reset service not available after waiting");

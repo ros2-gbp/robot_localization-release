@@ -2,100 +2,48 @@
 Changelog for package robot_localization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Unreleased (2026-02-09)
------------------------
-* Implement Lifecycle Node Support for EKF and UKF nodes (`#958 <https://github.com/cra-ros-pkg/robot_localization/issues/958>`_).
-  * Added `rclcpp_lifecycle` dependency, lifecycle callbacks, and updated launch files to expose an `autostart` argument.
-  * Added `doc/lifecycle_support.rst` with usage examples.
-  * Contributor: Boopesh
-
-3.10.1 (2026-07-16)
--------------------
-* Fixing Rolling API changes (`#973 <https://github.com/cra-ros-pkg/robot_localization/issues/973>`_)
-* Fixing rosdoc (`#970 <https://github.com/cra-ros-pkg/robot_localization/issues/970>`_)
-  * Fixing rosdoc
-* move conf.py to subfolder so that rosdoc2 works (`#969 <https://github.com/cra-ros-pkg/robot_localization/issues/969>`_)
-* Adding publishing of an REP-105 compliant ECEF transform (`#948 <https://github.com/cra-ros-pkg/robot_localization/issues/948>`_)
-  * Adding publishing of an REP-105 compliant ECEF transform
-* Fix negative time crashes in Rolling (port of `#954 <https://github.com/cra-ros-pkg/robot_localization/issues/954>`_) (`#964 <https://github.com/cra-ros-pkg/robot_localization/issues/964>`_)
-  * Fix additional negative time issues in ROS Kilted
-  The previous fix (e992754) addressed some Time constructor calls but
-  missed additional code paths:
-  1. getFilteredAccelMessage(): Removed redundant rclcpp::Time() wrapper
-  around filter\_.getLastMeasurementTime() which already returns an
-  rclcpp::Time with RCL_ROS_TIME clock type. Now matches the pattern
-  used in getFilteredOdometryMessage().
-  2. preparePose(): Added RCL_ROS_TIME clock type to Time constructor
-  calls for lookupTransformSafe(), matching the pattern used in
-  navsat_transform.cpp from commit e992754.
-  These paths are only exercised with specific configurations (e.g.,
-  acceleration output enabled, certain frame transform setups), which
-  is why they weren't caught in the original fix.
-  * Fix negative time crash in periodicUpdate clearExpiredHistory
-  Guard against subtracting history_length\_ from last_measurement_time
-  when last_measurement_time is smaller, which results in negative time
-  and throws an exception in rclcpp::Time.
-  This occurs during simulation startup when the filter has received
-  measurements but hasn't been running long enough for history_length\_
-  (default 0.5s) to have elapsed.
-  * Address PR review feedback
-  - Revert unintentional removal of rclcpp::Time cast in getFilteredAccelMessage
-  - Add clarifying comment for negative time point prevention check
-  ---------
-  Co-authored-by: Jay Herpin <jherpin@metalsharkboats.com>
-* Implement Lifecycle Node Support for EKF and UKF nodes (`#959 <https://github.com/cra-ros-pkg/robot_localization/issues/959>`_)
-  * Implement Lifecycle Node Support for EKF and UKF nodes
-* Ignoring vscode
+3.8.4 (2026-11-02)
+------------------
+* Drop the trailing underscore from broadcast_utm_transform_as_parent_frame (`#988 <https://github.com/cra-ros-pkg/robot_localization/issues/988>`_)
+* Add ToLLArray service (`#953 <https://github.com/cra-ros-pkg/robot_localization/issues/953>`_)
+  * Add ToLLArray service
 * Fix discrepancy between tf and odometry/filtered when world_frame is set to map_frame (`#939 <https://github.com/cra-ros-pkg/robot_localization/issues/939>`_)
   * Improve baselink odom transform lookup
   * New transform_timeout_odom_bl parameter and documentation (`#939 <https://github.com/cra-ros-pkg/robot_localization/issues/939>`_)
-* bugfix: imu linear acceleration gravity removal with rotated IMU (`#946 <https://github.com/cra-ros-pkg/robot_localization/issues/946>`_)
-  * bugfix: gravity vector rotated to target_grame (was IMU frame) prior to removal from acc_tmp.
-  ---------
-  Co-authored-by: Haoguang YANG <yang1510@purdue.edu>
 * Fixing angular acceleration initialisation (`#945 <https://github.com/cra-ros-pkg/robot_localization/issues/945>`_)
-* Contributors: Boopesh, Jay Herpin, Jonas Otto, Manuel Wopfner, Steve Macenski, Sybren Kappert, Tom Moore
+* Contributors: Dawid Kmak, Elmir, Sybren Kappert, Tom Moore
 
-3.10.0 (2025-08-29)
--------------------
+3.8.3 (2025-08-29)
+------------------
+* Add a Parameters Callback to set magnetic_declination_radians at runtime (`#920 <https://github.com/cra-ros-pkg/robot_localization/issues/920>`_)
+  * Add a Parameters Callback to be able to set magnetic_declination_radians value at runtime.
+* Fixing issue with subscriber disconnect (`#944 <https://github.com/cra-ros-pkg/robot_localization/issues/944>`_)
+  * Fixing issue with subscriber disconnect
+* Fixing ROS time sources (`#943 <https://github.com/cra-ros-pkg/robot_localization/issues/943>`_)
+* Fixing off-diagonal covariance values in measurement (`#942 <https://github.com/cra-ros-pkg/robot_localization/issues/942>`_)
+* Contributors: Enzo Ghisoni, Tom Moore
+
+3.8.2 (2025-03-21)
+------------------
+* Fix user UTM conversion and catch GeographicErr to not crash navsat_transfrom node (`#917 <https://github.com/cra-ros-pkg/robot_localization/issues/917>`_)
+  * Fix user UTM conversion and catch GeographicErr to not crash navsat_transform node
+  ---------
+  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
 * Added FromLLArray service (`#912 <https://github.com/cra-ros-pkg/robot_localization/issues/912>`_)
   * Added FromLLArray service
   ---------
   Co-authored-by: Marcin Słomiany <m.slomiany93@gmail.com>
-* Add a Parameters Callback to set magnetic_declination_radians at runtime (`#920 <https://github.com/cra-ros-pkg/robot_localization/issues/920>`_)
-* Backporting IMU sub reset fix
-* Fixing ROS time sources (`#943 <https://github.com/cra-ros-pkg/robot_localization/issues/943>`_)
-* Fixing off-diagonal covariance values in measurement (`#942 <https://github.com/cra-ros-pkg/robot_localization/issues/942>`_)
-* "toggle" and "enable" services are now namespaced (`#940 <https://github.com/cra-ros-pkg/robot_localization/issues/940>`_)
-* chore: tf2_ros to hpp headers (`#941 <https://github.com/cra-ros-pkg/robot_localization/issues/941>`_)
-* Contributors: Enzo Ghisoni, Jay Herpin, Tim Clephas, Tom Moore, ari-bw
-
-3.9.3 (2025-05-19)
-------------------
-* Fixing deprecated tf2 headers (`#926 <https://github.com/cra-ros-pkg/robot_localization/issues/926>`_)
-* Contributors: Tom Moore
-
-3.9.2 (2025-03-21)
-------------------
-* Same change on rolling (`#918 <https://github.com/cra-ros-pkg/robot_localization/issues/918>`_)
-  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
-* Fixing bug with diagonal covariance loading (`#909 <https://github.com/cra-ros-pkg/robot_localization/issues/909>`_)
-* Switching stamped control to default true for rolling/future distributions to align with Nav2 and ROS 2 Control (`#910 <https://github.com/cra-ros-pkg/robot_localization/issues/910>`_)
-* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
-  * Added subscription to stamped topic
+* Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_) (`#900 <https://github.com/cra-ros-pkg/robot_localization/issues/900>`_)
+  * Added subscription to stamped topic (`#898 <https://github.com/cra-ros-pkg/robot_localization/issues/898>`_)
 * Fixing IMU differential test (`#897 <https://github.com/cra-ros-pkg/robot_localization/issues/897>`_)
-* Contributors: Ferry Schoenmakers, Pablo, Steve Macenski, Tom Moore
+* Contributors: Ferry Schoenmakers, Jay Herpin, Pablo, Tom Moore
 
-3.9.1 (2024-08-29)
+3.8.1 (2024-08-29)
 ------------------
-* Switch robot_localization to modern CMake idioms. (`#895 <https://github.com/cra-ros-pkg/robot_localization/issues/895>`_)
-* Fix warnings when building against Rolling. (`#896 <https://github.com/cra-ros-pkg/robot_localization/issues/896>`_)
-* Resolve mixing of UTM and local transforms in local cartesian mode (`#886 <https://github.com/cra-ros-pkg/robot_localization/issues/886>`_)
 * Spam the logs a little bit less (`#880 <https://github.com/cra-ros-pkg/robot_localization/issues/880>`_)
-* Contributors: Chris Lalancette, JayHerpin, Tim Clephas
-
-3.9.0 (2024-04-24)
-------------------
+* Fix mixing of UTM and catesian transforms with in use_local_catesian mode (`#884 <https://github.com/cra-ros-pkg/robot_localization/issues/884>`_)
+  * Resolve mixing of UTM and local transforms in local cartesian mode
+* Contributors: JayHerpin, Tim Clephas
 
 3.8.0 (2024-04-21)
 ------------------

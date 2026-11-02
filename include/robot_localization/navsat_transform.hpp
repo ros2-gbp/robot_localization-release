@@ -48,24 +48,18 @@
 #include "robot_localization/srv/set_datum.hpp"
 #include "robot_localization/srv/set_utm_zone.hpp"
 #include "robot_localization/srv/to_ll.hpp"
+#include "robot_localization/srv/to_ll_array.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
-#include "tf2/LinearMath/Quaternion.hpp"
-#include "tf2/LinearMath/Transform.hpp"
-#include "tf2/LinearMath/Vector3.hpp"
-#include <tf2_ros/buffer.hpp>
-#include <tf2_ros/static_transform_broadcaster.hpp>
-#include <tf2_ros/transform_listener.hpp>
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2/LinearMath/Transform.h"
+#include "tf2/LinearMath/Vector3.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/static_transform_broadcaster.h"
+#include "tf2_ros/transform_listener.h"
 
 namespace robot_localization
 {
-
-/// \brief Computes the ECEF to ENU transform for a given geodetic origin
-/// \param lat0_deg Latitude of origin in degrees
-/// \param lon0_deg Longitude of origin in degrees
-/// \param h0_m Altitude of origin in meters
-/// \return Transform from ECEF (earth) frame to local ENU frame
-tf2::Transform computeEarthToCartesian(double lat0_deg, double lon0_deg, double h0_m);
 
 class NavSatTransform : public rclcpp::Node {
 public:
@@ -102,6 +96,12 @@ private:
   bool toLLCallback(
     const std::shared_ptr<robot_localization::srv::ToLL::Request> request,
     std::shared_ptr<robot_localization::srv::ToLL::Response> response);
+
+  //! @brief Callback for the to Lat Long Array service
+  //!
+  bool toLLArrayCallback(
+    const std::shared_ptr<robot_localization::srv::ToLLArray::Request> request,
+    std::shared_ptr<robot_localization::srv::ToLLArray::Response> response);
 
   //! @brief Callback for the from Lat Long service
   //!
@@ -246,6 +246,11 @@ private:
    * @brief Service for to Lat Long
    */
   rclcpp::Service<robot_localization::srv::ToLL>::SharedPtr to_ll_srv_;
+
+  /**
+   * @brief Service for to Lat Long Array
+   */
+  rclcpp::Service<robot_localization::srv::ToLLArray>::SharedPtr to_ll_array_srv_;
 
   /**
    * @brief Service for from Lat Long
@@ -446,9 +451,9 @@ private:
   bool use_odometry_yaw_;
 
   /**
-   * @brief Used for publishing static transforms
+   * @brief Used for publishing the static world_frame->cartesian transform
    */
-  tf2_ros::StaticTransformBroadcaster tf_broadcaster_;
+  tf2_ros::StaticTransformBroadcaster cartesian_broadcaster_;
 
   /**
    * @brief UTM's meridian convergence
@@ -512,31 +517,6 @@ private:
    * can be set.
    */
   geographic_msgs::msg::GeoPose manual_datum_geopose_;
-
-  /**
-   * @brief Earth frame ID for ECEF coordinates
-   */
-  std::string earth_frame_id_;
-
-  /**
-   * @brief Whether or not we broadcast the earth transform
-   * @note Only valid when use_local_cartesian_ is true.
-   *       Earth transforms are not supported with UTM coordinates.
-   */
-  bool broadcast_earth_transform_;
-
-  /**
-   * @brief Transform from earth to cartesian (ECEF to local/UTM)
-   * Note: This is the mathematical transform E2C, inverted when published to TF
-   */
-  tf2::Transform earth_cartesian_transform_;
-
-  /**
-   * @brief Origin GPS coordinates for earth frame computation
-   */
-  double origin_latitude_;
-  double origin_longitude_;
-  double origin_altitude_;
 };
 
 }  // namespace robot_localization

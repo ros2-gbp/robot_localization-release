@@ -36,7 +36,7 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include <tf2_ros/static_transform_broadcaster.hpp>
+#include "tf2_ros/static_transform_broadcaster.h"
 
 int main(int argc, char ** argv)
 {
@@ -49,9 +49,7 @@ int main(int argc, char ** argv)
   rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr accel_pub =
     node->create_publisher<geometry_msgs::msg::AccelWithCovarianceStamped>("accel/filtered", 1);
 
-  tf2_ros::StaticTransformBroadcaster transform_broadcaster(
-    tf2_ros::StaticTransformBroadcaster::RequiredInterfaces{
-    node->get_node_parameters_interface(), node->get_node_topics_interface()});
+  tf2_ros::StaticTransformBroadcaster transform_broadcaster(node);
 
   rclcpp::Time end_time = node->now() + rclcpp::Duration(10, 0);
   while (rclcpp::ok() && node->now() < end_time) {

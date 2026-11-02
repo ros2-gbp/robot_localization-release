@@ -35,12 +35,10 @@ def generate_launch_description(node_type):
     parameters_file_path = parameters_file_dir / 'test_se_node_interfaces.yaml'    
     os.environ['FILE_PATH'] = str(parameters_file_dir)
 
-    se_node = launch_ros.actions.LifecycleNode(
+    se_node = launch_ros.actions.Node(
             package='robot_localization',
             executable=node_type + '_node',
             name='test_se_node_interfaces',
-            namespace='',
-            autostart=False,
             output='screen',
             parameters=[
                 parameters_file_path,
