@@ -48,6 +48,7 @@
 #include "robot_localization/srv/from_ll.hpp"
 #include "robot_localization/srv/set_datum.hpp"
 #include "robot_localization/srv/to_ll.hpp"
+#include "robot_localization/srv/to_ll_array.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 #include "tf2/LinearMath/Matrix3x3.hpp"
@@ -136,7 +137,7 @@ NavSatTransform::NavSatTransform(const rclcpp::NodeOptions & options)
 
   broadcast_cartesian_transform_as_parent_frame_ =
     this->declare_parameter(
-    "broadcast_utm_transform_as_parent_frame_",
+    "broadcast_utm_transform_as_parent_frame",
     broadcast_cartesian_transform_as_parent_frame_);
 
   if (broadcast_cartesian_transform_as_parent_frame_) {
@@ -178,6 +179,8 @@ NavSatTransform::NavSatTransform(const rclcpp::NodeOptions & options)
 
   to_ll_srv_ = this->create_service<robot_localization::srv::ToLL>(
     "toLL", std::bind(&NavSatTransform::toLLCallback, this, _1, _2));
+  to_ll_array_srv_ = this->create_service<robot_localization::srv::ToLLArray>(
+    "toLLArray", std::bind(&NavSatTransform::toLLArrayCallback, this, _1, _2));
   from_ll_srv_ = this->create_service<robot_localization::srv::FromLL>(
     "fromLL", std::bind(&NavSatTransform::fromLLCallback, this, _1, _2));
   from_ll_array_srv_ = this->create_service<robot_localization::srv::FromLLArray>(
@@ -502,6 +505,36 @@ bool NavSatTransform::toLLCallback(
   return true;
 }
 
+bool NavSatTransform::toLLArrayCallback(
+  const std::shared_ptr<robot_localization::srv::ToLLArray::Request> request,
+  std::shared_ptr<robot_localization::srv::ToLLArray::Response> response)
+{
+  if (!transform_good_) {
+    return false;
+  }
+
+  decltype(response->ll_points) converted_ll_points;
+  converted_ll_points.reserve(request->map_points.size());
+
+  try {
+    std::transform(request->map_points.begin(), request->map_points.end(),
+                   std::back_inserter(converted_ll_points),
+      [this] (const auto & point) {
+        geographic_msgs::msg::GeoPoint ll_point;
+        tf2::Vector3 map_point(point.x, point.y, point.z);
+        mapToLL(
+          map_point, ll_point.latitude, ll_point.longitude,
+          ll_point.altitude);
+        return ll_point;
+      });
+  } catch(const std::runtime_error & e) {
+    return false;
+  }
+
+  response->ll_points = std::move(converted_ll_points);
+  return true;
+}
+
 bool NavSatTransform::fromLLCallback(
   const std::shared_ptr<robot_localization::srv::FromLL::Request> request,
   std::shared_ptr<robot_localization::srv::FromLL::Response> response)
@@ -760,6 +793,11 @@ void NavSatTransform::gpsFixCallback(
   const sensor_msgs::msg::NavSatFix::SharedPtr msg)
 {
   gps_frame_id_ = msg->header.frame_id;
+  // Strip any leading slash for tf2 compliance (older drivers may still
+  // publish frame_ids with a leading slash, a holdover from tf1)
+  if (!gps_frame_id_.empty() && gps_frame_id_.at(0) == '/') {
+    gps_frame_id_ = gps_frame_id_.substr(1);
+  }
 
   if (gps_frame_id_.empty()) {
     RCLCPP_ERROR(
