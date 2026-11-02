@@ -340,7 +340,7 @@ tracks:
       :{release_inc} --os-name rhel
     - git-bloom-generate -y rosdynrpm --prefix release/:{ros_distro} :{ros_distro}
       -i :{release_inc} --require-os fedora rhel
-    devel_branch: rolling-devel
+    devel_branch: lyrical-devel
     last_version: 3.10.0
     name: robot_localization
     patches: null
