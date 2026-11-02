@@ -111,6 +111,7 @@ RosFilter<T>::RosFilter(const rclcpp::NodeOptions & options)
   last_set_pose_time_(0, 0, RCL_ROS_TIME),
   latest_control_time_(0, 0, RCL_ROS_TIME),
   tf_timeout_(0ns),
+  tf_timeout_odom_bl_(0ns),
   tf_time_offset_(0ns)
 {
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -164,12 +165,20 @@ void RosFilter<T>::reset()
   filter_state_history_.clear();
   measurement_history_.clear();
 
+  angular_acceleration_.setZero();
+  angular_acceleration_cov_.setIdentity();
+  angular_acceleration_cov_ *= 0.01;
+
+  last_state_twist_rot_.setZero();
+
   // Also set the last set pose time, so we ignore all messages
   // that occur before it
   last_set_pose_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   last_diag_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   latest_control_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   last_published_stamp_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
+  last_diff_time_ = this->now().seconds();
 
   // clear tf buffer to avoid TF_OLD_DATA errors
   tf_buffer_->clear();
@@ -731,6 +740,10 @@ void RosFilter<T>::integrateMeasurements(const rclcpp::Time & current_time)
         restored_measurement_count--;
       }
 
+      auto previous_state = filter_.getState();
+      auto previous_covar = filter_.getEstimateErrorCovariance();
+      auto last_measurement_time = filter_.getLastMeasurementTime();
+
       // This will call predict and, if necessary, correct
       filter_.processMeasurement(*(measurement.get()));
 
@@ -948,6 +961,10 @@ void RosFilter<T>::loadParams()
   double timeout_tmp = this->declare_parameter("transform_timeout", 0.0);
   tf_timeout_ = rclcpp::Duration::from_seconds(timeout_tmp);
 
+  // Transform timeout odom->base_link
+  double timeout_odom_bl_tmp = this->declare_parameter("transform_timeout_odom_bl", 0.0);
+  tf_timeout_odom_bl_ = rclcpp::Duration::from_seconds(timeout_odom_bl_tmp);
+
   // Update frequency and sensor timeout
   frequency_ = this->declare_parameter("frequency", 30.0);
 
@@ -1127,6 +1144,7 @@ void RosFilter<T>::loadParams()
       "\nworld_frame is " << world_frame_id_ <<
       "\ntransform_time_offset is " << filter_utilities::toSec(tf_time_offset_) <<
       "\ntransform_timeout is " << filter_utilities::toSec(tf_timeout_) <<
+      "\ntransform_timeout_odom_bl is " << filter_utilities::toSec(tf_timeout_odom_bl_) <<
       "\nfrequency is " << frequency_ <<
       "\nsensor_timeout is " << filter_utilities::toSec(filter_.getSensorTimeout()) <<
       "\ntwo_d_mode is " << (two_d_mode_ ? "true" : "false") <<
@@ -1777,9 +1795,6 @@ void RosFilter<T>::loadParams()
     }
   } while (more_params);
 
-  angular_acceleration_cov_.resize(ORIENTATION_SIZE, ORIENTATION_SIZE);
-  angular_acceleration_cov_.setZero();
-
   // Now that we've checked if IMU linear acceleration is being used, we can
   // determine our final control parameters
   if (use_control_ && std::accumulate(
@@ -2073,6 +2088,12 @@ void RosFilter<T>::initialize()
     this->get_clock()->wait_until_started();
   }
 
+  angular_acceleration_.setZero();
+  angular_acceleration_cov_.setIdentity();
+  angular_acceleration_cov_ *= 1e-6;
+
+  last_state_twist_rot_.setZero();
+
   diagnostic_updater_ = std::make_unique<diagnostic_updater::Updater>(
     shared_from_this());
   diagnostic_updater_->setHardwareID("none");
@@ -2100,6 +2121,7 @@ void RosFilter<T>::initialize()
       &max_frequency_, 0.1, 10));
 
   last_diag_time_ = this->now();
+  last_diff_time_ = this->now().seconds();
 
   // Clear out the transforms
   world_base_link_trans_msg_.transform =
@@ -2203,30 +2225,29 @@ void RosFilter<T>::periodicUpdate()
       if (filtered_position->header.frame_id == odom_frame_id_) {
         world_transform_broadcaster_->sendTransform(world_base_link_trans_msg_);
       } else if (filtered_position->header.frame_id == map_frame_id_) {
-        try {
-          tf2::Transform world_base_link_trans;
-          tf2::fromMsg(
-            world_base_link_trans_msg_.transform,
-            world_base_link_trans);
+        tf2::Transform world_base_link_trans;
+        tf2::fromMsg(
+          world_base_link_trans_msg_.transform,
+          world_base_link_trans);
 
-          tf2::Transform base_link_odom_trans;
-          tf2::fromMsg(
-            tf_buffer_
-            ->lookupTransform(
-              base_link_frame_id_,
-              odom_frame_id_,
-              tf2::TimePointZero)
-            .transform,
-            base_link_odom_trans);
+        tf2::Transform base_link_odom_trans;
+        bool can_transform_odom = ros_filter_utilities::lookupTransformSafe(
+          tf_buffer_.get(),
+          base_link_frame_id_,
+          odom_frame_id_,
+          filtered_position->header.stamp,
+          tf_timeout_odom_bl_,
+          base_link_odom_trans);
 
+        if(can_transform_odom) {
           /*
            * First, see these two references:
            * http://wiki.ros.org/tf/Overview/Using%20Published%20Transforms#lookupTransform
            * http://wiki.ros.org/geometry/CoordinateFrameConventions#Transform_Direction
            * We have a transform from map_frame_id_->base_link_frame_id_, but
            * it would actually transform a given pose from
-           * base_link_frame_id_->map_frame_id_. We then used lookupTransform,
-           * whose first two arguments are target frame and source frame, to
+           * base_link_frame_id_->map_frame_id_. We then used lookupTransformSafe,
+           * whose second and third arguments are target frame and source frame, to
            * get a transform from base_link_frame_id_->odom_frame_id_.
            * However, this transform would actually transform data from
            * odom_frame_id_->base_link_frame_id_. Now imagine that we have a
@@ -2252,7 +2273,7 @@ void RosFilter<T>::periodicUpdate()
           map_odom_trans_msg.child_frame_id = odom_frame_id_;
 
           world_transform_broadcaster_->sendTransform(map_odom_trans_msg);
-        } catch (...) {
+        } else {
           RCLCPP_ERROR_STREAM_SKIPFIRST_THROTTLE(
             get_logger(),
             *get_clock(),
