@@ -1,4 +1,2 @@
 geographic_msgs/GeoPose geo_pose
 ---
-bool success
-string message
