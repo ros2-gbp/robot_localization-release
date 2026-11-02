@@ -113,7 +113,7 @@ tracks:
     - git-bloom-generate -y rosdynrpm --prefix release/:{ros_distro} :{ros_distro}
       -i :{release_inc} --require-os fedora rhel
     devel_branch: humble-devel
-    last_version: 3.5.4
+    last_version: 3.5.5
     name: robot_localization
     patches: null
     release_inc: '1'
