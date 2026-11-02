@@ -67,13 +67,7 @@ Some packages require that your transforms are future-dated by a small time offs
 
 ~transform_timeout
 ^^^^^^^^^^^^^^^^^^
-The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to obtain the transformations needed to convert measurements into a target frame (likely being base_link). This parameter specifies the maximum amount of time, in seconds, to wait for the desired transformation to become available. The parameter defaults to a value of 0 if not set. A value of 0 means that only currently available information is used. This may not result in the ideal transformation, but ensures that the filter execution is not blocked. A non-zero value can yield a more accurate transformation but can temporarely block the execution of the filter. The filter's timing can be affected if excessive blocking occurs causing it to be unable to maintain the specified output rate.
-
-~transform_timeout_odom_bl
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-When ``world_frame`` is set to the same value as ``map_frame``, the filter computes the transformation from ``map_frame`` to ``base_link_frame``. If ``publish_tf`` is set to *true*, this transformation should be published to ``tf2``. However, publishing it directly is not permitted due to the frame conventions established by `REP-105 <https://www.ros.org/reps/rep-0105.html>`_. Instead, the filter must look up the ``odom_frame`` to ``base_link_frame`` transformation and use it to compute and broadcast the ``map_frame`` to ``odom_frame`` transformation.
-
-The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to obtain the required ``odom_frame`` to ``base_link_frame`` transformation. This parameter specifies the maximum amount of time, in seconds, to wait for the desired transformation to become available. Setting it to a suitable value can improve performance in applications that rely on accurate transformations related to the ``map_frame``. The parameter defaults to a value of 0 if not set. A value of 0 means that only currently available information is used. This may not result in the ideal transformation, but ensures that the filter execution is not blocked. A non-zero value can yield a more accurate transformation but can temporarely block the execution of the filter. The filter's timing can be affected if excessive blocking occurs causing it to be unable to maintain the specified output rate.
+The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to request transformations. This parameter specifies how long we would like to wait if a transformation is not available yet. Defaults to 0 if not set. The value 0 means we just get us the latest available (see ``tf2`` implementation) transform so we are not blocking the filter. Specifying a non-zero `transform_timeout` affects the filter's timing since it waits for a maximum of the `transform_timeout` for a transform to become available. This directly implies that mostly the specified desired output rate is not met since the filter has to wait for transforms when updating.
 
 ~[sensor]
 ^^^^^^^^^
@@ -251,7 +245,7 @@ If ``smooth_lagged_data`` is set to *true*, this parameter specifies the number 
 ~[sensor]_nodelay
 ^^^^^^^^^^^^^^^^^
 
-ROS 1 specific parameters:
+Specific parameters:
 
 * ``~odomN_nodelay``
 * ``~twistN_nodelay``
@@ -286,8 +280,6 @@ If ``debug`` is *true*, the file to which debug output is written.
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 The process noise covariance, commonly denoted *Q*, is used to model uncertainty in the prediction stage of the filtering algorithms. It can be difficult to tune, and has been exposed as a parameter for easier customization. This parameter can be left alone, but you will achieve superior results by tuning it. In general, the larger the value for *Q* relative to the variance for a given variable in an input message, the faster the filter will converge to the value in the measurement.
 
-Specifying the full covariance matrix is supported, but can be cumbersome. For that reason, this parameter can also be used to simply specify the diagonal values. In that event, all off-diagonal values will be set to 0.
-
 ~dynamic_process_noise_covariance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If *true*, will dynamically scale the ``process_noise_covariance`` based on the robot's velocity. This is useful, e.g., when you want your robot's estimate error covariance to stop growing when the robot is stationary. Defaults to *false*.
@@ -295,8 +287,6 @@ If *true*, will dynamically scale the ``process_noise_covariance`` based on the 
 ~initial_estimate_covariance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The estimate covariance, commonly denoted *P*, defines the error in the current state estimate. The parameter allows users to set the initial value for the matrix, which will affect how quickly the filter converges. For example, if users set the value at position :math:`[0, 0]` to a very small value, e.g., `1e-12`, and then attempt to fuse measurements of X position with a high variance value for :math:`X`, then the filter will be very slow to "trust" those measurements, and the time required for convergence will increase. Again, users should take care with this parameter. When only fusing velocity data (e.g., no absolute pose information), users will likely *not* want to set the initial covariance values for the absolute pose variables to large numbers. This is because those errors are going to grow without bound (owing to the lack of absolute pose measurements to reduce the error), and starting them with large values will not benefit the state estimate.
-
-Specifying the full covariance matrix is supported, but can be cumbersome. For that reason, this parameter can also be used to simply specify the diagonal values. In that event, all off-diagonal values will be set to 0.
 
 ~reset_on_time_jump
 ^^^^^^^^^^^^^^^^^^^
