@@ -67,7 +67,13 @@ Some packages require that your transforms are future-dated by a small time offs
 
 ~transform_timeout
 ^^^^^^^^^^^^^^^^^^
-The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to request transformations. This parameter specifies how long we would like to wait if a transformation is not available yet. Defaults to 0 if not set. The value 0 means we just get us the latest available (see ``tf2`` implementation) transform so we are not blocking the filter. Specifying a non-zero `transform_timeout` affects the filter's timing since it waits for a maximum of the `transform_timeout` for a transform to become available. This directly implies that mostly the specified desired output rate is not met since the filter has to wait for transforms when updating.
+The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to obtain the transformations needed to convert measurements into a target frame (likely being base_link). This parameter specifies the maximum amount of time, in seconds, to wait for the desired transformation to become available. The parameter defaults to a value of 0 if not set. A value of 0 means that only currently available information is used. This may not result in the ideal transformation, but ensures that the filter execution is not blocked. A non-zero value can yield a more accurate transformation but can temporarely block the execution of the filter. The filter's timing can be affected if excessive blocking occurs causing it to be unable to maintain the specified output rate.
+
+~transform_timeout_odom_bl
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+When ``world_frame`` is set to the same value as ``map_frame``, the filter computes the transformation from ``map_frame`` to ``base_link_frame``. If ``publish_tf`` is set to *true*, this transformation should be published to ``tf2``. However, publishing it directly is not permitted due to the frame conventions established by `REP-105 <https://www.ros.org/reps/rep-0105.html>`_. Instead, the filter must look up the ``odom_frame`` to ``base_link_frame`` transformation and use it to compute and broadcast the ``map_frame`` to ``odom_frame`` transformation.
+
+The ``robot_localization`` package uses ``tf2``'s ``lookupTransform`` method to obtain the required ``odom_frame`` to ``base_link_frame`` transformation. This parameter specifies the maximum amount of time, in seconds, to wait for the desired transformation to become available. Setting it to a suitable value can improve performance in applications that rely on accurate transformations related to the ``map_frame``. The parameter defaults to a value of 0 if not set. A value of 0 means that only currently available information is used. This may not result in the ideal transformation, but ensures that the filter execution is not blocked. A non-zero value can yield a more accurate transformation but can temporarely block the execution of the filter. The filter's timing can be affected if excessive blocking occurs causing it to be unable to maintain the specified output rate.
 
 ~[sensor]
 ^^^^^^^^^
@@ -148,7 +154,7 @@ If this parameter is set to ``true``, then any measurements from this sensor wil
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If fusing accelerometer data from IMUs, this parameter determines whether or not acceleration due to gravity is removed from the acceleration measurement before fusing it.
 
-.. note:: This assumes that the IMU that is providing the acceleration data is also producing an absolute orientation. The orientation data is required to correctly remove gravitational acceleration.
+.. note:: This uses the absolute orientation estimate from the IMU message, if available. If the IMU does not provide an orientation estimate, the first element of the orientation covariance must be set to -1, to indicate this, as specified in the IMU message definition. The orientation of the robot state is then used for gravity removal.
 
 ~gravitational_acceleration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
