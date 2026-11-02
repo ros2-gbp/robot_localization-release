@@ -38,7 +38,6 @@
 #include <functional>
 #include <limits>
 #include <memory>
-#include <numeric>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -211,8 +210,7 @@ RosFilter<T>::on_configure(const rclcpp_lifecycle::State &)
 
   // Set up transform broadcaster (must be before loadParams)
   world_transform_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(
-    tf2_ros::TransformBroadcaster::RequiredInterfaces{
-      get_node_parameters_interface(), get_node_topics_interface()});
+    shared_from_this());
 
   // Load all parameters - this declares and loads everything
   // After this call, all parameters like print_diagnostics_, frequency_, etc. are available
@@ -1149,14 +1147,12 @@ void RosFilter<T>::loadParams()
    *
    * The state estimation nodes in robot_localization therefore have two
    * "modes." If your world_frame parameter value matches the odom_frame
-   * parameter value, robot_localization will compute and broadcast the
-   * odom_frame->base_link_frame transform. If your world_frame parameter value
-   * matches the map_frame parameter value, robot_localization will assume
-   * someone else is broadcasting the odom_frame->base_link_frame transform and
-   * will compute and broadcast the map_frame->odom_frame transform.
+   * parameter value, then robot_localization will assume someone else is
+   * broadcasting a transform from odom_frame->base_link_frame, and it will
+   * compute the map_frame->odom_frame transform. Otherwise, it will simply
+   * compute the odom_frame->base_link_frame transform.
    *
-   * By default, world_frame matches odom_frame and robot_localization broadcasts
-   * odom_frame->base_link_frame.
+   * The default is the latter behavior (broadcast of odom->base_link).
    */
   this->get_parameter_or("world_frame", world_frame_id_, odom_frame_id_);
 

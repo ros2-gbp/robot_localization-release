@@ -129,13 +129,6 @@ public:
   std::vector<diagnostic_msgs::msg::DiagnosticArray> diagnostics;
   rclcpp::Node::SharedPtr node_;
 
-  void spinSome()
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node_);
-    executor.spin_some();
-  }
-
   DiagnosticsHelper()
   {
     node_ = rclcpp::Node::make_shared("test_filter_base_diagnostics");
@@ -215,12 +208,12 @@ TEST(FilterBaseDiagnosticsTest, EmptyTimestamps) {
   // For about a second, send correct messages.
   rclcpp::Rate loopRate(10);
   for (size_t i = 0; i < 10; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     dh_.publishMessages((dh_.node_)->now());
     loopRate.sleep();
   }
 
-  dh_.spinSome();
+  rclcpp::spin_some(dh_.node_);
 
   // create an empty timestamp and send all messages with this empty timestamp.
   static uint32_t empty_sec = 0;
@@ -230,12 +223,12 @@ TEST(FilterBaseDiagnosticsTest, EmptyTimestamps) {
   rclcpp::Time empty = msg;
 
   dh_.publishMessages(empty);
-  dh_.spinSome();
+  rclcpp::spin_some(dh_.node_);
 
   // The filter runs and sends the diagnostics every second.
   // Just run this for two seconds to ensure we get all the diagnostic message.
   for (size_t i = 0; i < 20; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     loopRate.sleep();
   }
 
@@ -287,17 +280,17 @@ TEST(FilterBaseDiagnosticsTest, TimestampsBeforeSetPose) {
   // For about a second, send correct messages.
   rclcpp::Rate loopRate(10);
   for (size_t i = 0; i < 10; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     dh_.publishMessages((dh_.node_)->now());
     loopRate.sleep();
   }
-  dh_.spinSome();
+  rclcpp::spin_some(dh_.node_);
 
   rclcpp::Time curr = (dh_.node_)->now();
   // Set the pose to the current timestamp.
   dh_.setPose(curr);
 
-  dh_.spinSome();
+  rclcpp::spin_some(dh_.node_);
 
   // wait for 1 sec to make synchronize setPose msg & before msg
   sleep(1);
@@ -307,7 +300,7 @@ TEST(FilterBaseDiagnosticsTest, TimestampsBeforeSetPose) {
   // The filter runs and sends the diagnostics every second.
   // Just run this for two seconds to ensure we get all the diagnostic message.
   for (size_t i = 0; i < 20; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     loopRate.sleep();
   }
   /*
@@ -361,11 +354,11 @@ TEST(FilterBaseDiagnosticsTest, TimestampsBeforePrevious) {
   // For two seconds send correct messages.
   rclcpp::Rate loopRate(20);
   for (size_t i = 0; i < 20; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     dh_.publishMessages((dh_.node_)->now());
     loopRate.sleep();
   }
-  dh_.spinSome();
+  rclcpp::spin_some(dh_.node_);
 
   // Send message that is one second in the past.
   dh_.publishMessages((dh_.node_)->now() - rclcpp::Duration(1, 0));
@@ -373,7 +366,7 @@ TEST(FilterBaseDiagnosticsTest, TimestampsBeforePrevious) {
   // The filter runs and sends the diagnostics every second.
   // Just run this for two seconds to ensure we get all the diagnostic message.
   for (size_t i = 0; i < 20; ++i) {
-    dh_.spinSome();
+    rclcpp::spin_some(dh_.node_);
     loopRate.sleep();
   }
 

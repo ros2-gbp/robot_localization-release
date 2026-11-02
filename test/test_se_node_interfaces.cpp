@@ -72,17 +72,10 @@ void filterCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   state_updated_ = true;
 }
 
-void spinNodeSome()
-{
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node_);
-  executor.spin_some();
-}
-
 void resetFilter()
 {
   // Force any callbacks to fire in the UKF
-  spinNodeSome();
+  rclcpp::spin_some(node_);
 
   auto reset_request = std::make_shared<std_srvs::srv::Empty::Request>();
   auto result = reset_client_->async_send_request(reset_request);
@@ -112,7 +105,7 @@ TEST(InterfacesTest, OdomPoseBasicIO) {
     odom.header.stamp = node_->now();
     odom0_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -147,7 +140,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -162,7 +155,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.y - odom.twist.twist.linear.y), 0.1);
@@ -177,7 +170,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.z - odom.twist.twist.linear.z), 0.1);
@@ -193,7 +186,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -211,7 +204,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   odom.twist.twist.angular.x = 0.0;
@@ -222,7 +215,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   odom.twist.twist.angular.y = 0.0;
@@ -235,7 +228,7 @@ TEST(InterfacesTest, OdomTwistBasicIO) {
     odom.header.stamp = node_->now();
     odom2_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - odom.twist.twist.linear.x), 0.1);
@@ -264,7 +257,7 @@ TEST(InterfacesTest, PoseBasicIO) {
     pose.header.stamp = node_->now();
     pose0_pub_->publish(pose);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -297,7 +290,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -312,7 +305,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(
@@ -329,7 +322,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(
@@ -346,7 +339,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -363,7 +356,7 @@ TEST(InterfacesTest, TwistBasicIO) {
   for (size_t i = 0; i < 100; ++i) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }
@@ -375,7 +368,7 @@ TEST(InterfacesTest, TwistBasicIO) {
   for (size_t i = 0; i < 100; ++i) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }
@@ -390,7 +383,7 @@ TEST(InterfacesTest, TwistBasicIO) {
     twist.header.stamp = node_->now();
     twist0_pub_->publish(twist);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - twist.twist.twist.linear.x), 0.1);
@@ -418,7 +411,7 @@ TEST(InterfacesTest, ImuPoseBasicIO) {
     imu.header.stamp = node_->now();
     imu0_pub_->publish(imu);
     loop_rate1.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -452,7 +445,7 @@ TEST(InterfacesTest, ImuPoseBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu0_pub_->publish(imuIgnore);
     loop_rate2.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     EXPECT_FALSE(state_updated_);
   }
 
@@ -482,7 +475,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -511,9 +504,9 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
-  spinNodeSome();
+  rclcpp::spin_some(node_);
 
   // Now check the values from the callback
   tf2::fromMsg(filtered_.pose.pose.orientation, quat);
@@ -533,7 +526,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imu.header.stamp = node_->now();
     imu1_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   // Now check the values from the callback
@@ -561,7 +554,7 @@ TEST(InterfacesTest, ImuTwistBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu1_pub_->publish(imuIgnore);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   tf2::fromMsg(filtered_.pose.pose.orientation, quat);
@@ -592,7 +585,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imu.header.stamp = node_->now();
     imu2_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.twist.twist.linear.x - 1.0), 0.40);
@@ -608,7 +601,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imu.header.stamp = node_->now();
     imu2_pub_->publish(imu);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1.8), 0.6);
@@ -631,7 +624,7 @@ TEST(InterfacesTest, ImuAccBasicIO) {
     imuIgnore.header.stamp = node_->now();
     imu2_pub_->publish(imuIgnore);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     EXPECT_FALSE(state_updated_);
   }
 
@@ -668,7 +661,7 @@ TEST(InterfacesTest, OdomDifferentialIO) {
   while (zeroCount++ < 10) {
     odom.header.stamp = node_->now();
     odom1_pub_->publish(odom);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     EXPECT_LT(std::abs(filtered_.pose.pose.position.x), 0.01);
     EXPECT_LT(std::abs(filtered_.pose.pose.position.y), 0.01);
@@ -694,7 +687,7 @@ TEST(InterfacesTest, OdomDifferentialIO) {
     odom.header.stamp = node_->now();
     odom1_pub_->publish(odom);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1), 0.2);
@@ -727,7 +720,7 @@ TEST(InterfacesTest, PoseDifferentialIO) {
   while (zeroCount++ < 10) {
     pose.header.stamp = node_->now();
     pose1_pub_->publish(pose);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     EXPECT_LT(std::abs(filtered_.pose.pose.position.x), 0.01);
     EXPECT_LT(std::abs(filtered_.pose.pose.position.y), 0.01);
@@ -754,7 +747,7 @@ TEST(InterfacesTest, PoseDifferentialIO) {
     pose.header.stamp = node_->now();
     pose1_pub_->publish(pose);
     loop_rate.sleep();
-    spinNodeSome();
+    rclcpp::spin_some(node_);
   }
 
   EXPECT_LT(std::abs(filtered_.pose.pose.position.x - 1), 0.2);
@@ -791,11 +784,11 @@ TEST(InterfacesTest, ImuDifferentialIO) {
     imu.header.stamp = node_->now();
 
     imu0_pub_->publish(imu);  // Use this to move the absolute orientation
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     set_rate.sleep();
 
     imu1_pub_->publish(imu);  // Use this to keep velocities at 0
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     set_rate.sleep();
   }
 
@@ -804,7 +797,7 @@ TEST(InterfacesTest, ImuDifferentialIO) {
   while (zeroCount++ < 10) {
     imu.header.stamp = node_->now();
     imu3_pub_->publish(imu);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
     rclcpp::Rate(10).sleep();
   }
 
@@ -819,7 +812,7 @@ TEST(InterfacesTest, ImuDifferentialIO) {
     imu.orientation = tf2::toMsg(current_quat);
     imu.header.stamp = node_->now();
     imu3_pub_->publish(imu);
-    spinNodeSome();
+    rclcpp::spin_some(node_);
 
     loop_rate.sleep();
   }

@@ -83,11 +83,7 @@ TEST_F(EarthChainTest, CaseA_EarthToCartesianAndCartesianToWorld)
   auto tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf_buffer);
 
   // Give some time for transforms to be published
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node->get_node_base_interface());
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Test that we can lookup earth->cartesian transform
@@ -122,11 +118,7 @@ TEST_F(EarthChainTest, CaseB_EarthToWorldAndWorldToCartesian)
   auto tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf_buffer);
 
   // Give some time for transforms to be published
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node->get_node_base_interface());
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Test that we can lookup earth->world transform
@@ -160,11 +152,7 @@ TEST_F(EarthChainTest, CaseC_EarthToWorldOnly)
   auto tf_listener = std::make_unique<tf2_ros::TransformListener>(*tf_buffer);
 
   // Give some time for transforms to be published
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node->get_node_base_interface());
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Test that we can lookup earth->world transform and no cartesian link
@@ -204,11 +192,7 @@ TEST_F(EarthChainTest, ECEFConversionAccuracy)
   auto node = createNavSatNode(parameters);
 
   // Give some time for initialization
-  {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node->get_node_base_interface());
-    executor.spin_some();
-  }
+  rclcpp::spin_some(node);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Test basic parameters were set correctly
