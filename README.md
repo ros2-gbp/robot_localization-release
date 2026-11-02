@@ -1,3 +1,26 @@
+## robot_localization (kilted) - 3.9.5-1
+
+The packages in the `robot_localization` repository were released into the `kilted` distro by running `/usr/bin/bloom-release -t kilted -r kilted robot_localization` on `Mon, 02 Nov 2026 09:43:06 -0000`
+
+The `robot_localization` package was released.
+
+Version of package(s) in repository `robot_localization`:
+
+- upstream repository: https://github.com/cra-ros-pkg/robot_localization.git
+- release repository: https://github.com/ros2-gbp/robot_localization-release.git
+- rosdistro version: `3.9.4-1`
+- old version: `3.9.4-1`
+- new version: `3.9.5-1`
+
+Versions of tools used:
+
+- bloom version: `0.14.4`
+- catkin_pkg version: `1.1.1`
+- rosdep version: `0.27.0`
+- rosdistro version: `1.1.0`
+- vcstools version: `0.1.42`
+
+
 ## robot_localization (humble) - 3.5.5-1
 
 The packages in the `robot_localization` repository were released into the `humble` distro by running `/usr/bin/bloom-release -t humble -r humble robot_localization` on `Mon, 02 Nov 2026 09:40:59 -0000`
